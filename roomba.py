@@ -1,7 +1,10 @@
 import bge
+import itertools
 import math
 import random
 import time
+
+# All units are mks
 
 FORWARD_VEL = 0.33
 REVERSE_TIME = 20
@@ -13,7 +16,52 @@ TURN_45_TIME = REVERSE_TIME / 4.0
 
 ANGULAR_VELOCITY = 3.14 / REVERSE_DURATION
 
+OBSTACLE_CIRCLE_RADIUS = 5
+
+obstacles = {}
 roombas = {}
+
+class Obstacle:
+    def __init__(self, owner):
+        obstacles[owner] = self
+        self._owner = owner
+
+        self._start_signal = False
+        self._wait_signal = False
+
+        self._bumper_on = False
+
+        self._state = 'wait'
+
+    def loop(self):
+        #print(self._state)
+        if self._state == 'wait':
+            if self._start_signal:
+                self._state = 'run'
+                self._start_signal = False
+        elif self._state == 'run':
+            if self._wait_signal:
+                self._state = 'wait'
+                self._wait_signal = False
+            elif self._bumper_on:
+                #print('Stopping')
+                self._owner.setAngularVelocity([0, 0, 0])
+                self._owner.setLinearVelocity([0, 0, 0])
+            else:
+                self._owner.setAngularVelocity([0, 0, -FORWARD_VEL / OBSTACLE_CIRCLE_RADIUS], True)
+                self._owner.setLinearVelocity([FORWARD_VEL, 0, 0], True)
+
+    def send_start_signal(self):
+        self._start_signal = True
+
+    def send_wait_signal(self):
+        self._wait_signal = True
+
+    def update_bumper(self, new_state):
+        if new_state:
+            self._bumper_on = True
+        else:
+            self._bumper_on = False
 
 class Roomba:
     def __init__(self, owner):
@@ -31,14 +79,11 @@ class Roomba:
         self._last_noise_time = time.time()
         self._touch_start_time = time.time()
 
-        self._state = 'start'
+        self._state = 'wait'
 
     def loop(self):
-        if self._state == 'start':
-            self._last_noise_end_time = time.time()
-            self._last_reverse_end_time = time.time()
-            self._state = 'run'
-        elif self._state == 'wait':
+        #print(self._state)
+        if self._state == 'wait':
             if self._start_signal:
                 self._state = 'run'
                 self._start_signal = False
@@ -119,16 +164,46 @@ class Roomba:
     def set_touch(self):
         self._top_touched = True
 
+    def send_start_signal(self):
+        self._start_signal = True
+
+    def send_wait_signal(self):
+        self._wait_signal = True
+
+def create_roomba():
+    Roomba(bge.logic.getCurrentController().owner)
+
+def create_obstacle():
+    Obstacle(bge.logic.getCurrentController().owner)
+
 def update():
     obj = bge.logic.getCurrentController().owner
-    if not obj in roombas:
-        Roomba(obj)
-    roombas[obj].loop()
+    if obj in roombas:
+        roombas[obj].loop()
+    else:
+        obstacles[obj].loop()
+
+def send_start_signal():
+    print(bge.logic.getCurrentController().owner['mouseover'])
+    if not bge.logic.getCurrentController().owner['mouseover']:
+        return
+    for robot in itertools.chain(obstacles.values(), roombas.values()):
+        robot.send_start_signal()
+
+def send_wait_signal():
+    if not bge.logic.getCurrentController().owner['mouseover']:
+        return
+    for robot in itertools.chain(obstacles.values(), roombas.values()):
+        robot.send_wait_signal()
 
 def set_radar():
     controller = bge.logic.getCurrentController()
     if controller.sensors['Radar'].positive:
         roombas[controller.owner].set_radar()
+
+def update_bumper():
+    controller = bge.logic.getCurrentController()
+    obstacles[controller.owner].update_bumper(controller.sensors['Radar'].positive)
 
 def set_touch():
     controller = bge.logic.getCurrentController()
