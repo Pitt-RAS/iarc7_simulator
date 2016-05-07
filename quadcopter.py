@@ -1,4 +1,5 @@
 import bge
+from bge import texture
 from mathutils import Euler
 import math
 import control
@@ -66,3 +67,54 @@ def get_roll():
 
 def get_altitude():
     return bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME].worldPosition[2]
+
+inited = False
+camera_image = None
+def get_camera_image():
+    if not inited:
+        obj = bge.logic.getCurrentScene().objects['Empty']
+        for child in obj.children:
+            if 'CameraRobot' in child.name:
+                camera = child
+            if 'CameraMesh' in child.name:
+                screen = child
+                mesh = child.meshes[0]
+                for material in mesh.materials:
+                    material_index = material.getMaterialIndex()
+                    mesh_material_name = mesh.getMaterialName(material_index)
+                    if 'MAScreenMat' in mesh_material_name:
+                        material_name = mesh_material_name
+        s = [scene for scene in bge.logic.getSceneList() if scene.name == 'S.256x256'][0]
+        img_renderer = texture.ImageRender(s, camera)
+        mat_id = texture.materialID(screen, material_name)
+        global camera_image
+        camera_image = texture.Texture(screen, mat_id)
+        camera_image.source = img_renderer
+        camera.lens = 35.0
+        camera.near = 0.1
+        camera.far = 100.0
+        camera_image.source.background = [143]*4
+        camera_image.source.capsize = [512, 512]
+    camera_image.source.refresh()
+    print(camera_image.source.valid)
+    camera_image.refresh(True)
+    #if s == None:
+    #    global s
+    #    #s = bge.logic.addScene('S.256x256', 0)
+    #    s = [scene for scene in bge.logic.getSceneList() if scene.name == 'S.256x256'][0]
+    #scene = s
+    #quad = scene.objects[QUAD_OBJECT_NAME]
+    ##camera = quad.children['ForwardCamera']
+    #camera = scene.objects['Camera']
+
+    ##matID = texture.materialID(scene.objects['Cube.003'], 'MAMaterial.003')
+
+    ##if t == None:
+    ##    global t
+    ##    t = texture.Texture(scene.objects['Cube.003'], matID)
+    ##    t.source = texture.ImageRender(scene, camera)
+    #print(texture.ImageRender(scene, camera).image)
+
+    #print(t.source.valid)
+    #print(t.source.image)
+    #t.refresh(True)
