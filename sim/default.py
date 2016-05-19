@@ -6,16 +6,29 @@ Basic MORSE simulation scene for <sim> environment
 Feel free to edit this template as you like!
 """
 
+import math
 from morse.builder import Environment, Quadrotor
 from sim.builder.robots import Roomba, Obstacle
 
+roomba_placement_radius = 1
 for i in range(10):
-    robot = Roomba('Roomba' + str(i))
-    robot.translate(0, i * 0.5, 0)
+    angle = math.pi / 5 * i
+    robot = Roomba('Roomba%i'%i)
+    robot.translate(roomba_placement_radius * math.cos(angle),
+                    roomba_placement_radius * math.sin(angle),
+                    0)
+    robot.rotate(0, 0, angle)
     robot.add_default_interface('socket')
 
-quad = Quadrotor()
-quad.translate(1, 0, 0)
+obstacle_placement_radius = 5
+for i in range(4):
+    angle = math.pi / 2 * i
+    robot = Obstacle('Obstacle%i'%i)
+    robot.translate(obstacle_placement_radius * -math.sin(angle),
+                    obstacle_placement_radius * math.cos(angle),
+                    0)
+    robot.rotate(0, 0, angle)
+    robot.add_default_interface('socket')
 
 # set 'fastmode' to True to switch to wireframe mode
 env = Environment('environment.blend', fastmode = False)

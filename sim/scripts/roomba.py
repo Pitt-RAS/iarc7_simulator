@@ -20,21 +20,25 @@ OBSTACLE_CIRCLE_RADIUS = 5
 class Obstacle:
     def __init__(self, owner):
         self._owner = owner
-        self._owner.FrontBumper.subscribe(lambda data: self._update_bumper(data, 0))
-        self._owner.LeftBumper.subscribe(lambda data: self._update_bumper(data, 1))
-        self._owner.RightBumper.subscribe(lambda data: self._update_bumper(data, 2))
 
         self._start_signal = False
         self._wait_signal = False
 
         # Each element is the flag for a specific bumper
-        self._bumper_data = [False, False, False]
+        self._bumper_data = []
         self._bumper_on = False
 
         self._state = 'wait'
 
+        i = 0
+        for component_name in self._owner:
+            if 'Bumper' in component_name:
+                callback = lambda data, i = i: self._update_bumper(data, i)
+                getattr(self._owner, component_name).subscribe(callback)
+                self._bumper_data.append(False)
+                i += 1
+
     def loop(self):
-        #print(self._state)
         if self._state == 'wait':
             if self._start_signal:
                 self._state = 'run'
@@ -44,7 +48,6 @@ class Obstacle:
                 self._state = 'wait'
                 self._wait_signal = False
             elif self._bumper_on:
-                #print('Stopping')
                 self._owner.motion.publish({'v': 0, 'w': 0})
             else:
                 self._owner.motion.publish({'v': FORWARD_VEL, 'w': -FORWARD_VEL / OBSTACLE_CIRCLE_RADIUS})
@@ -62,10 +65,6 @@ class Obstacle:
 class Roomba:
     def __init__(self, owner):
         self._owner = owner
-        self._owner.FrontBumper.subscribe(lambda data: self._update_bumper(data))
-        self._owner.LeftBumper.subscribe(lambda data: self._update_bumper(data))
-        self._owner.RightBumper.subscribe(lambda data: self._update_bumper(data))
-        self._owner.TopTouchSensor.subscribe(lambda data: self._update_touch(data))
 
         self._angular_noise_velocity = 0
 
@@ -80,8 +79,11 @@ class Roomba:
 
         self._state = 'wait'
 
+        for component_name in self._owner:
+            if 'Bumper' in component_name:
+                getattr(self._owner, component_name).subscribe(lambda data: self._update_bumper(data))
+
     def loop(self):
-        #print(self._state)
         if self._state == 'wait':
             if self._start_signal:
                 self._state = 'run'
@@ -160,7 +162,6 @@ class Roomba:
         self._wait_signal = True
 
     def _update_bumper(self, sensor_data):
-        print("updated:", time.time(), self._owner.name, sensor_data['positive'])
         if sensor_data['positive']:
             self._bump_signal = True
 

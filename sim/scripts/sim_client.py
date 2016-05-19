@@ -24,7 +24,7 @@ with Morse() as simu:
 
     last_time = 0
     while True:
-        while time.time() - last_time < 0.01: pass
+        while time.time() - last_time < 0.02: pass
         last_time = time.time()
         for roomba in roombas:
             roomba.loop()

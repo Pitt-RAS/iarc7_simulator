@@ -1,5 +1,13 @@
+import math
 from morse.builder import *
 from sim.builder.sensors.BumpSensor import BumpSensor
+
+# Angle occupied by one sensor in radians
+BUMP_SENSOR_ANGLE = 0.489957
+NUM_BUMP_SENSORS = 6
+
+BASE_RADIUS = 0.15
+BASE_HEIGHT = 0.1
 
 class Obstacle(GroundRobot):
     """
@@ -34,16 +42,13 @@ class Obstacle(GroundRobot):
         self.pose = Pose()
         self.append(self.pose)
 
-        self.FrontBumper = BumpSensor('FrontBumper')
-        self.FrontBumper.translate(0.15, 0, 0.05)
-        self.append(self.FrontBumper)
-
-        self.LeftBumper = BumpSensor('LeftBumper')
-        self.LeftBumper.translate(0.15 / 2, 0.15 * math.sqrt(3) / 2, 0.05)
-        self.LeftBumper.rotate(0, 0, math.pi / 3)
-        self.append(self.LeftBumper)
-
-        self.RightBumper = BumpSensor('RightBumper')
-        self.RightBumper.translate(0.15 / 2, -0.15 * math.sqrt(3) / 2, 0.05)
-        self.RightBumper.rotate(0, 0, -math.pi / 3)
-        self.append(self.RightBumper)
+        angle = -float(NUM_BUMP_SENSORS - 1) / 2 * BUMP_SENSOR_ANGLE
+        sensor_radius = BASE_RADIUS + 0.01
+        for i in range(6):
+            next_bumper = BumpSensor('Bumper%i'%i)
+            next_bumper.translate(sensor_radius * math.cos(angle),
+                                  sensor_radius * math.sin(angle),
+                                  BASE_HEIGHT / 2.0)
+            next_bumper.rotate(0, 0, angle)
+            self.append(next_bumper)
+            angle += BUMP_SENSOR_ANGLE

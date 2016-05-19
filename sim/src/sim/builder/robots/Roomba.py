@@ -1,6 +1,14 @@
+import math
 from morse.builder import *
 from sim.builder.sensors.BumpSensor import BumpSensor
 from sim.builder.sensors.TopTouchSensor import TopTouchSensor
+
+# Angle occupied by one sensor in radians
+BUMP_SENSOR_ANGLE = 0.489957
+NUM_BUMP_SENSORS = 6
+
+ROOMBA_RADIUS = 0.15
+ROOMBA_HEIGHT = 0.1
 
 class Roomba(GroundRobot):
     """
@@ -35,20 +43,17 @@ class Roomba(GroundRobot):
         self.pose = Pose()
         self.append(self.pose)
 
-        self.FrontBumper = BumpSensor('FrontBumper')
-        self.FrontBumper.translate(0.15, 0, 0.05)
-        self.append(self.FrontBumper)
-
-        self.LeftBumper = BumpSensor('LeftBumper')
-        self.LeftBumper.translate(0.15 / 2, 0.15 * math.sqrt(3) / 2, 0.05)
-        self.LeftBumper.rotate(0, 0, math.pi / 3)
-        self.append(self.LeftBumper)
-
-        self.RightBumper = BumpSensor('RightBumper')
-        self.RightBumper.translate(0.15 / 2, -0.15 * math.sqrt(3) / 2, 0.05)
-        self.RightBumper.rotate(0, 0, -math.pi / 3)
-        self.append(self.RightBumper)
+        angle = -float(NUM_BUMP_SENSORS - 1) / 2 * BUMP_SENSOR_ANGLE
+        sensor_radius = ROOMBA_RADIUS + 0.01
+        for i in range(6):
+            next_bumper = BumpSensor('Bumper%i'%i)
+            next_bumper.translate(sensor_radius * math.cos(angle),
+                                  sensor_radius * math.sin(angle),
+                                  ROOMBA_HEIGHT / 2.0)
+            next_bumper.rotate(0, 0, angle)
+            self.append(next_bumper)
+            angle += BUMP_SENSOR_ANGLE
 
         self.top_sensor = TopTouchSensor('TopTouchSensor')
-        self.top_sensor.translate(0, 0, 0.1)
+        self.top_sensor.translate(0, 0, ROOMBA_HEIGHT + 0.01)
         self.append(self.top_sensor)
