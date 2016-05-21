@@ -42,14 +42,14 @@ class Quadcopter:
         prop_speed = self._throttle * PROP_MAX_SPEED
         thrust = (prop_speed * PROP_PITCH - self._z_velocity) * MASS_PER_REV * prop_speed
         thrust = min(MAX_THRUST, max(thrust, 0))
-        #self._owner.initialize()
+
         self._owner.set_thrust(thrust * NUMBER_OF_PROPS)
-        thrust = 0.01
+
         self._owner.motion.publish({
             'roll': self._target_roll,
             'pitch': self._target_pitch,
             'yaw': self._target_heading,
-            'thrust': NUMBER_OF_PROPS * thrust
+            'thrust': 0.01
             })
 
     def set_throttle(self, throttle):

@@ -1,5 +1,4 @@
 from morse.builder.creator import ComponentCreator, SensorCreator
-from morse.builder.creator import SensorCreator
 import os
 
 class BumpSensor(SensorCreator):

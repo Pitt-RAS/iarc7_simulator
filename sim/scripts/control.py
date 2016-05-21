@@ -64,4 +64,4 @@ def loop(quad):
     throttle += integral
     throttle -= KD_ALTITUDE * altitude_change / dt
     print(('%.3f\t'*5)%(error, integral, altitude_change, dt, throttle))
-    quad.set_throttle(constrain(throttle, 0.01, 1))
+    quad.set_throttle(throttle)

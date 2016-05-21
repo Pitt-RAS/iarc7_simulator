@@ -22,7 +22,7 @@ class Quadcopter(morse.core.robot.Robot):
 
         # Do here robot specific initializations
         logger.info('Component initialized')
-        self.thrust = 9.8
+        self.thrust = 0
 
     @service
     def set_thrust(self, thrust):

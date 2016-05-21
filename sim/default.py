@@ -31,9 +31,8 @@ for i in range(4):
     robot.add_default_interface('socket')
 
 robot = Quadcopter('Quadcopter')
-robot.translate(0, 0, 0.5)
+robot.translate(0, 0, 0.2)
 robot.add_default_interface('socket')
-robot.add_stream('socket')
 robot.add_service('socket')
 
 # set 'fastmode' to True to switch to wireframe mode
