@@ -1,4 +1,5 @@
-# Blender workspace files
+# Editor-specific files
+*.swp
 *.blend1
 
 # Byte-compiled / optimized / DLL files
