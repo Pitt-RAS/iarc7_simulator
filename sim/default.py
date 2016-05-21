@@ -7,8 +7,8 @@ Feel free to edit this template as you like!
 """
 
 import math
-from morse.builder import Environment, Quadrotor
-from sim.builder.robots import Roomba, Obstacle
+from morse.builder import Environment
+from sim.builder.robots import Roomba, Obstacle, Quadcopter
 
 roomba_placement_radius = 1
 for i in range(10):
@@ -29,6 +29,12 @@ for i in range(4):
                     0)
     robot.rotate(0, 0, angle)
     robot.add_default_interface('socket')
+
+robot = Quadcopter('Quadcopter')
+robot.translate(0, 0, 0.5)
+robot.add_default_interface('socket')
+robot.add_stream('socket')
+robot.add_service('socket')
 
 # set 'fastmode' to True to switch to wireframe mode
 env = Environment('environment.blend', fastmode = False)

@@ -1,5 +1,6 @@
 import logging; logger = logging.getLogger("morse." + __name__)
 import morse.core.robot
+from bge import constraints
 
 class Roomba(morse.core.robot.Robot):
     """ 
@@ -9,6 +10,7 @@ class Roomba(morse.core.robot.Robot):
     _name = 'Roomba robot'
 
     def __init__(self, obj, parent=None):
+        constraints.setDebugMode(constraints.DBG_DRAWWIREFRAME)
         """ Constructor method
 
         Receives the reference to the Blender object.

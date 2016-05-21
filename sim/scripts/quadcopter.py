@@ -1,120 +1,84 @@
-import bge
-from bge import texture
-from mathutils import Euler
 import math
-import control
 
 # all units in mks
-
-QUAD_OBJECT_NAME = 'F450'
 
 NUMBER_OF_PROPS = 4
 
 PROP_DIAMETER = 0.2
 PROP_PITCH = 0.1
-PROP_MAX_SPEED = 8214 # ideally 14985 # rpm
+PROP_MAX_SPEED = 8214 / 60.0 # ideally 14985 / 60.0 # revs / s
 AIR_DENSITY = 1.225
 
 PROP_AREA = math.pi * (PROP_DIAMETER / 2)**2
 VOLUME_PER_REV = PROP_PITCH * PROP_AREA
 MASS_PER_REV = AIR_DENSITY * VOLUME_PER_REV
 
-def update():
-    control.loop()
+MAX_THRUST = (PROP_MAX_SPEED * PROP_PITCH + 2) * MASS_PER_REV * PROP_MAX_SPEED
 
-    quad = bge.logic.getCurrentController().owner
-    throttle = quad['throttle']
-    heading = quad['heading'] * math.pi / 180
-    pitch = quad['pitch'] * math.pi / 180
-    roll = quad['roll'] * math.pi / 180
-    orientation = (-heading, pitch, roll)
-    quad.worldOrientation = Euler(orientation, 'ZYX')
+class Quadcopter:
+    def __init__(self, owner):
+        self._owner = owner
 
-    velocity = quad.getLinearVelocity(True)[2]
+        self._update_velocity(self._owner.velocity.get())
+        self._owner.velocity.subscribe(lambda data: self._update_velocity(data))
+        self._update_pose(self._owner.pose.get())
+        self._owner.pose.subscribe(lambda data: self._update_pose(data))
 
-    prop_speed = throttle * PROP_MAX_SPEED * (1/60.0)
-    thrust = (prop_speed * PROP_PITCH - velocity) * MASS_PER_REV * prop_speed
+        self._throttle = 0
+        self._target_pitch = 0
+        self._target_roll = 0
+        self._target_heading = self._current_heading
 
-    quad.applyForce((0, 0, NUMBER_OF_PROPS * thrust), True)
+    def _update_velocity(self, data):
+        self._z_velocity = data['linear_velocity'][2]
 
-def set_throttle(throttle):
-    if throttle > 1:
-        throttle = 1
-    elif throttle < 0:
-        throttle = 0
-    bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['throttle'] = throttle
+    def _update_pose(self, data):
+        self._altitude = data['z']
+        self._current_heading = data['yaw']
+        self._current_pitch = data['pitch']
+        self._current_roll = data['roll']
 
-def set_heading(heading):
-    bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['heading'] = heading
+    def loop(self):
+        prop_speed = self._throttle * PROP_MAX_SPEED
+        thrust = (prop_speed * PROP_PITCH - self._z_velocity) * MASS_PER_REV * prop_speed
+        thrust = min(MAX_THRUST, max(thrust, 0))
+        #self._owner.initialize()
+        self._owner.set_thrust(thrust * NUMBER_OF_PROPS)
+        thrust = 0.01
+        self._owner.motion.publish({
+            'roll': self._target_roll,
+            'pitch': self._target_pitch,
+            'yaw': self._target_heading,
+            'thrust': NUMBER_OF_PROPS * thrust
+            })
 
-def set_pitch(pitch):
-    bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['pitch'] = pitch
+    def set_throttle(self, throttle):
+        if throttle > 1:
+            throttle = 1
+        elif throttle < 0:
+            throttle = 0
+        self._throttle = throttle
 
-def set_roll(roll):
-    bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['roll'] = roll
+    def set_target_heading(self, heading):
+        self._target_heading = heading
 
-def get_throttle():
-    return bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['throttle']
+    def set_target_pitch(self, pitch):
+        self._target_pitch = pitch
 
-def get_heading():
-    return bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['heading']
+    def set_target_roll(self, roll):
+        self._target_roll = roll
 
-def get_pitch():
-    return bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['pitch']
+    def get_throttle(self):
+        return self._throttle
 
-def get_roll():
-    return bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME]['roll']
+    def get_target_heading(self):
+        return self._target_heading
 
-def get_altitude():
-    return bge.logic.getCurrentScene().objects[QUAD_OBJECT_NAME].worldPosition[2]
+    def get_target_pitch(self):
+        return self._target_pitch
 
-inited = False
-camera_image = None
-def get_camera_image():
-    if not inited:
-        obj = bge.logic.getCurrentScene().objects['Empty']
-        for child in obj.children:
-            if 'CameraRobot' in child.name:
-                camera = child
-            if 'CameraMesh' in child.name:
-                screen = child
-                mesh = child.meshes[0]
-                for material in mesh.materials:
-                    material_index = material.getMaterialIndex()
-                    mesh_material_name = mesh.getMaterialName(material_index)
-                    if 'MAScreenMat' in mesh_material_name:
-                        material_name = mesh_material_name
-        s = [scene for scene in bge.logic.getSceneList() if scene.name == 'S.256x256'][0]
-        img_renderer = texture.ImageRender(s, camera)
-        mat_id = texture.materialID(screen, material_name)
-        global camera_image
-        camera_image = texture.Texture(screen, mat_id)
-        camera_image.source = img_renderer
-        camera.lens = 35.0
-        camera.near = 0.1
-        camera.far = 100.0
-        camera_image.source.background = [143]*4
-        camera_image.source.capsize = [512, 512]
-    camera_image.source.refresh()
-    print(camera_image.source.valid)
-    camera_image.refresh(True)
-    #if s == None:
-    #    global s
-    #    #s = bge.logic.addScene('S.256x256', 0)
-    #    s = [scene for scene in bge.logic.getSceneList() if scene.name == 'S.256x256'][0]
-    #scene = s
-    #quad = scene.objects[QUAD_OBJECT_NAME]
-    ##camera = quad.children['ForwardCamera']
-    #camera = scene.objects['Camera']
+    def get_target_roll(self):
+        return self._target_roll
 
-    ##matID = texture.materialID(scene.objects['Cube.003'], 'MAMaterial.003')
-
-    ##if t == None:
-    ##    global t
-    ##    t = texture.Texture(scene.objects['Cube.003'], matID)
-    ##    t.source = texture.ImageRender(scene, camera)
-    #print(texture.ImageRender(scene, camera).image)
-
-    #print(t.source.valid)
-    #print(t.source.image)
-    #t.refresh(True)
+    def get_current_altitude(self):
+        return self._altitude

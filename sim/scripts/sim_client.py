@@ -2,11 +2,14 @@
 
 from pymorse import Morse
 from roomba import Roomba, Obstacle
+from quadcopter import Quadcopter
+import control
 import time
 
 with Morse() as simu:
     roombas = []
     obstacles = []
+    quad = Quadcopter(simu.Quadcopter)
     for robot_name in simu.robots:
         if 'Roomba' in robot_name:
             roombas.append(Roomba(getattr(simu, robot_name)))
@@ -30,3 +33,5 @@ with Morse() as simu:
             roomba.loop()
         for obstacle in obstacles:
             obstacle.loop()
+        quad.loop()
+        control.loop(quad)
