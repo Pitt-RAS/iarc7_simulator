@@ -53,4 +53,4 @@ def loop():
     throttle += integral
     throttle -= KD_ALTITUDE * altitude_change / dt
     quadcopter.set_throttle(constrain(throttle, 0, 1))
-    quadcopter.get_camera_image()
+#    quadcopter.get_camera_image()
