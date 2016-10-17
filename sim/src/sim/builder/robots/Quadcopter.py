@@ -1,4 +1,5 @@
 from morse.builder import *
+from sim.builder.actuators.thrust import Thrust
 
 class Quadcopter(Robot):
     """
@@ -23,6 +24,13 @@ class Quadcopter(Robot):
                                YawRateControl = False
                                )
         self.append(self.motion)
+
+        self.thrust = Thrust()
+        self.thrust.properties(NumberOfProps = 4,
+                               PropDiameter = 0.2,
+                               PropPitch = 0.1,
+                               PropMaxSpeed = 8214 / 60.0)
+        self.append(self.thrust)
 
         ###################################
         # Sensors
