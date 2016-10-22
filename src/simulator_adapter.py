@@ -45,7 +45,7 @@ def control_throttle_callback(throttle_msg):
     thrust_msg = Float32MultiArray()
     quad_thrust_pub.publish(throttle_msg.data)
 
-def main():
+if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
@@ -74,6 +74,3 @@ def main():
         status_pub.publish(status_msg)
 
         rate.sleep()
-
-if __name__ == '__main__':
-    main()
