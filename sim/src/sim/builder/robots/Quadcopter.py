@@ -1,5 +1,8 @@
 from morse.builder import *
 from sim.builder.actuators.thrust import Thrust
+from sim.builder.sensors.LidarLite import LidarLite
+
+import math
 
 class Quadcopter(Robot):
     """
@@ -45,6 +48,12 @@ class Quadcopter(Robot):
         self.accel = Accelerometer()
         self.accel.add_stream('ros', topic='/sim/quad_accel')
         self.append(self.accel)
+
+        self.lidar = LidarLite()
+        self.lidar.translate(z=-0.1)
+        self.lidar.rotate(y=math.pi/2)
+        self.lidar.add_stream('ros', 'sim.middleware.ros.lidarlite.LidarLitePublisher', topic='/altitude_raw')
+        self.append(self.lidar)
 
         self.velocity = Velocity()
         self.append(self.velocity)
