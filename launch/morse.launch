@@ -1,0 +1,5 @@
+<launch>
+    <node name="morse_launcher" pkg="iarc7_simulator" type="morse_launcher.sh"
+       cwd="node" />
+    <node name="simulator_adapter" pkg="iarc7_simulator" type="simulator_adapter.py" />
+</launch>
