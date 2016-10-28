@@ -57,3 +57,43 @@ class Quadcopter(Robot):
 
         self.velocity = Velocity()
         self.append(self.velocity)
+
+        self.down_camera = VideoCamera()
+        self.down_camera.properties(
+                cam_width=512,
+                cam_height=512
+                )
+        self.down_camera.translate(z=-0.2)
+        self.down_camera.rotate(y=-math.pi/2)
+        self.down_camera.add_stream('ros', topic='/down_image_raw')
+        self.append(self.down_camera)
+
+        self.front_camera = VideoCamera()
+        self.front_camera.properties(
+                cam_width=512,
+                cam_height=512
+                )
+        self.front_camera.translate(x=0.3)
+        self.front_camera.rotate(y=-math.pi/6)
+        self.front_camera.add_stream('ros', topic='/front_image_raw')
+        self.append(self.front_camera)
+
+        self.right_camera = VideoCamera()
+        self.right_camera.properties(
+                cam_width=512,
+                cam_height=512
+                )
+        self.right_camera.translate(y=0.2)
+        self.right_camera.rotate(y=-math.pi/2, z=-math.pi/4)
+        self.right_camera.add_stream('ros', topic='/right_image_raw')
+        self.append(self.right_camera)
+
+        self.left_camera = VideoCamera()
+        self.left_camera.properties(
+                cam_width=512,
+                cam_height=512
+                )
+        self.left_camera.translate(y=-0.2)
+        self.left_camera.rotate(y=-math.pi/2, z=math.pi/4)
+        self.left_camera.add_stream('ros', topic='/left_image_raw')
+        self.append(self.left_camera)
