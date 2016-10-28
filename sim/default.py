@@ -27,8 +27,6 @@ for i in range(4):
 
 robot = Quadcopter('Quadcopter')
 robot.translate(0, 0, 0.2)
-robot.add_default_interface('socket')
-robot.add_service('socket')
 
 fake_robot = FakeRobot()
 clock = Clock()
