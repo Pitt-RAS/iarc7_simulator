@@ -1,7 +1,7 @@
 #! /usr/bin/env morseexec
 
 import math
-from morse.builder import Clock, Environment
+from morse.builder import Clock, Environment, FakeRobot
 from morse.core.morse_time import TimeStrategies
 from sim.builder.robots import Roomba, Obstacle, Quadcopter
 
@@ -29,6 +29,11 @@ robot = Quadcopter('Quadcopter')
 robot.translate(0, 0, 0.2)
 robot.add_default_interface('socket')
 robot.add_service('socket')
+
+fake_robot = FakeRobot()
+clock = Clock()
+clock.add_interface('ros', topic='/clock')
+fake_robot.append(clock)
 
 # set 'fastmode' to True to switch to wireframe mode
 env = Environment('environment.blend', fastmode = False)
