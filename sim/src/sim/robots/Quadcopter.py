@@ -22,11 +22,6 @@ class Quadcopter(morse.core.robot.Robot):
 
         # Do here robot specific initializations
         logger.info('Component initialized')
-        self.thrust = 0
-
-    @service
-    def set_thrust(self, thrust):
-        self.thrust = thrust
 
     def default_action(self):
         """ Main loop of the robot
@@ -34,4 +29,3 @@ class Quadcopter(morse.core.robot.Robot):
 
         # This is usually not used (responsibility of the actuators
         # and sensors). But you can add here robot-level actions.
-        self.bge_object.applyForce((0, 0, self.thrust), True)

@@ -1,20 +1,3 @@
-import math
-
-# all units in mks
-
-NUMBER_OF_PROPS = 4
-
-PROP_DIAMETER = 0.2
-PROP_PITCH = 0.1
-PROP_MAX_SPEED = 8214 / 60.0 # ideally 14985 / 60.0 # revs / s
-AIR_DENSITY = 1.225
-
-PROP_AREA = math.pi * (PROP_DIAMETER / 2)**2
-VOLUME_PER_REV = PROP_PITCH * PROP_AREA
-MASS_PER_REV = AIR_DENSITY * VOLUME_PER_REV
-
-MAX_THRUST = (PROP_MAX_SPEED * PROP_PITCH + 2) * MASS_PER_REV * PROP_MAX_SPEED
-
 class Quadcopter:
     def __init__(self, owner):
         self._owner = owner
@@ -35,15 +18,9 @@ class Quadcopter:
     def _update_pose(self, data):
         self._altitude = data['z']
         self._current_heading = data['yaw']
-        self._current_pitch = data['pitch']
-        self._current_roll = data['roll']
 
     def loop(self):
-        prop_speed = self._throttle * PROP_MAX_SPEED
-        thrust = (prop_speed * PROP_PITCH - self._z_velocity) * MASS_PER_REV * prop_speed
-        thrust = min(MAX_THRUST, max(thrust, 0))
-
-        self._owner.set_thrust(thrust * NUMBER_OF_PROPS)
+        self._owner.thrust.publish({'throttle': self._throttle})
 
         self._owner.motion.publish({
             'roll': self._target_roll,
