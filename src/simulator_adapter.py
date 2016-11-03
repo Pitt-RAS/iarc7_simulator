@@ -25,6 +25,16 @@ def sim_pose_callback(pose_msg):
 
     tf2_broadcaster.sendTransform(transform_msg)
 
+    if publish_ground_truth_localization:
+        transform_msg = TransformStamped()
+        transform_msg.header.stamp = pose_msg.header.stamp
+        transform_msg.header.frame_id = 'map'
+        transform_msg.child_frame_id = 'level_quad'
+        transform_msg.transform.translation = pose_msg.pose.position
+        transform_msg.transform.rotation.w = 1
+
+        tf2_broadcaster.sendTransform(transform_msg)
+
 def control_angles_callback(angles_msg):
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
@@ -47,6 +57,8 @@ def control_throttle_callback(throttle_msg):
 
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
+
+    publish_ground_truth_localization = rospy.get_param('/sim/ground_truth_localization', False)
 
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
     rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
