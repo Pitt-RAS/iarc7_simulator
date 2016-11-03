@@ -35,6 +35,14 @@ def sim_pose_callback(pose_msg):
 
         tf2_broadcaster.sendTransform(transform_msg)
 
+    if publish_ground_truth_altitude:
+        altitude_msg = Float64Stamped()
+        altitude_msg.header.stamp = pose_msg.header.stamp
+        altitude_msg.header.frame_id = 'map'
+        altitude_msg.data = pose_msg.pose.position.z
+
+        altitude_pub.publish(altitude_msg)
+
 def control_angles_callback(angles_msg):
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
@@ -59,17 +67,20 @@ if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
     publish_ground_truth_localization = rospy.get_param('/sim/ground_truth_localization', False)
+    publish_ground_truth_altitude = rospy.get_param('/sim/ground_truth_altitude', False)
 
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
     rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
-    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size = 0)
-    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size = 0)
+    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size=0)
+    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size=0)
 
     rospy.Subscriber('uav_control', OrientationAnglesStamped, control_angles_callback)
     rospy.Subscriber('uav_throttle', Float64Stamped, control_throttle_callback)
-    accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size = 0)
-    battery_pub = rospy.Publisher('fc_battery', Float32, queue_size = 0)
-    status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size = 0)
+    accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
+    battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
+    status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
+    if publish_ground_truth_altitude:
+        altitude_pub = rospy.Publisher('altitude', Float64Stamped, queue_size=0)
     tf2_broadcaster = tf2.TransformBroadcaster()
 
     frequency = rospy.get_param('frequency', 50)
