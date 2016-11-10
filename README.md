@@ -1,9 +1,9 @@
-# iarc7-simulator
+# iarc7_simulator
 Simulator that allows testing of algorithms for the IARC Mission 7 competition
 
 ## Setup
 
-First, you want to clone the repo and put it in the `src` directory of your catkin workspace.  You want to rename the folder to `iarc7_simulator` too. You should then be able to run `catkin_make` and have everything compile. You then need to run the following:
+First, you want to clone the repo and put it in the `src` directory of your catkin workspace.  You should then be able to run `catkin_make` and have everything compile. You then need to run the following:
 
     cd iarc7_simulator
     morse import sim
