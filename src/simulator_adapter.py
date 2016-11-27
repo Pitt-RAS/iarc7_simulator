@@ -3,7 +3,7 @@ import rospy
 
 from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Vector3Stamped
 from std_msgs.msg import Float32, Float64, Float32MultiArray, Header, MultiArrayDimension
-from iarc7_msgs.msg import FlightControllerStatus, Float64Stamped, OrientationAnglesStamped
+from iarc7_msgs.msg import FlightControllerStatus, Float64Stamped, OrientationThrottleStamped
 
 import tf2_ros as tf2
 
@@ -43,7 +43,9 @@ def sim_pose_callback(pose_msg):
 
         altitude_pub.publish(altitude_msg)
 
-def control_angles_callback(angles_msg):
+def control_direction_callback(direction_msg):
+    quad_thrust_pub.publish(direction_msg.throttle)
+
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
     attitude_msg.layout.dim[0].label = ''
@@ -51,17 +53,13 @@ def control_angles_callback(angles_msg):
     attitude_msg.layout.dim[0].stride = 1
     attitude_msg.layout.data_offset = 0
     attitude_msg.data = [
-            angles_msg.data.roll,
-            angles_msg.data.pitch,
-            angles_msg.data.yaw,
+            direction_msg.data.roll,
+            direction_msg.data.pitch,
+            direction_msg.data.yaw,
             0.01
         ]
 
     quad_attitude_pub.publish(attitude_msg)
-
-def control_throttle_callback(throttle_msg):
-    thrust_msg = Float32MultiArray()
-    quad_thrust_pub.publish(throttle_msg.data)
 
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
@@ -74,8 +72,7 @@ if __name__ == '__main__':
     quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size=0)
     quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size=0)
 
-    rospy.Subscriber('uav_control', OrientationAnglesStamped, control_angles_callback)
-    rospy.Subscriber('uav_throttle', Float64Stamped, control_throttle_callback)
+    rospy.Subscriber('uav_direction_command', OrientationThrottleStamped, control_direction_callback)
     accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
     battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
