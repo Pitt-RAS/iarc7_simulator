@@ -3,7 +3,7 @@ import rospy
 
 from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Vector3Stamped
 from std_msgs.msg import Float32, Float64, Float32MultiArray, Header, MultiArrayDimension
-from iarc7_msgs.msg import FlightControllerStatus, Float64Stamped, OrientationAnglesStamped
+from iarc7_msgs.msg import FlightControllerStatus, Float64Stamped, OrientationThrottleStamped
 
 import tf2_ros as tf2
 
@@ -25,7 +25,28 @@ def sim_pose_callback(pose_msg):
 
     tf2_broadcaster.sendTransform(transform_msg)
 
-def control_angles_callback(angles_msg):
+    if publish_ground_truth_localization:
+        transform_msg = TransformStamped()
+        transform_msg.header.stamp = pose_msg.header.stamp
+        transform_msg.header.frame_id = 'map'
+        transform_msg.child_frame_id = 'level_quad'
+        transform_msg.transform.translation = pose_msg.pose.position
+        transform_msg.transform.rotation.w = 1
+
+        tf2_broadcaster.sendTransform(transform_msg)
+
+    if publish_ground_truth_altitude:
+        altitude_msg = Float64Stamped()
+        altitude_msg.header.stamp = pose_msg.header.stamp
+        altitude_msg.header.frame_id = 'map'
+        altitude_msg.data = pose_msg.pose.position.z
+
+        altitude_pub.publish(altitude_msg)
+
+def control_direction_callback(direction_msg):
+    # Incoming range is [0, 100], outgoing is [0, 1]
+    quad_thrust_pub.publish(direction_msg.throttle * 0.01)
+
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
     attitude_msg.layout.dim[0].label = ''
@@ -33,31 +54,31 @@ def control_angles_callback(angles_msg):
     attitude_msg.layout.dim[0].stride = 1
     attitude_msg.layout.data_offset = 0
     attitude_msg.data = [
-            angles_msg.data.roll,
-            angles_msg.data.pitch,
-            angles_msg.data.yaw,
-            0.01
+            direction_msg.data.roll,
+            direction_msg.data.pitch,
+            direction_msg.data.yaw,
+            0.00001
         ]
 
     quad_attitude_pub.publish(attitude_msg)
 
-def control_throttle_callback(throttle_msg):
-    thrust_msg = Float32MultiArray()
-    quad_thrust_pub.publish(throttle_msg.data)
-
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
+    publish_ground_truth_localization = rospy.get_param('/sim/ground_truth_localization', False)
+    publish_ground_truth_altitude = rospy.get_param('/sim/ground_truth_altitude', False)
+
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
     rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
-    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size = 0)
-    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size = 0)
+    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size=0)
+    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size=0)
 
-    rospy.Subscriber('uav_control', OrientationAnglesStamped, control_angles_callback)
-    rospy.Subscriber('uav_throttle', Float64Stamped, control_throttle_callback)
-    accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size = 0)
-    battery_pub = rospy.Publisher('fc_battery', Float32, queue_size = 0)
-    status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size = 0)
+    rospy.Subscriber('uav_direction_command', OrientationThrottleStamped, control_direction_callback)
+    accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
+    battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
+    status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
+    if publish_ground_truth_altitude:
+        altitude_pub = rospy.Publisher('altitude', Float64Stamped, queue_size=0)
     tf2_broadcaster = tf2.TransformBroadcaster()
 
     frequency = rospy.get_param('frequency', 50)
