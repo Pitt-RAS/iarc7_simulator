@@ -44,7 +44,8 @@ def sim_pose_callback(pose_msg):
         altitude_pub.publish(altitude_msg)
 
 def control_direction_callback(direction_msg):
-    quad_thrust_pub.publish(direction_msg.throttle)
+    # Incoming range is [0, 100], outgoing is [0, 1]
+    quad_thrust_pub.publish(direction_msg.throttle * 0.01)
 
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
@@ -56,7 +57,7 @@ def control_direction_callback(direction_msg):
             direction_msg.data.roll,
             direction_msg.data.pitch,
             direction_msg.data.yaw,
-            0.01
+            0.00001
         ]
 
     quad_attitude_pub.publish(attitude_msg)
