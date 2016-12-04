@@ -38,3 +38,8 @@ env = Environment('environment.blend', fastmode = False)
 env.set_time_strategy(TimeStrategies.FixedSimulationStep)
 env.set_camera_location([-18.0, -6.7, 10.8])
 env.set_camera_rotation([1.09, 0, -1.14])
+
+import bpy
+import rospy
+mat = bpy.data.materials.get(rospy.get_param('/sim/floor'))
+bpy.data.objects['Plane'].data.materials[0] = mat

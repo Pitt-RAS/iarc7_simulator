@@ -1,3 +1,4 @@
 sim:
     ground_truth_localization: false
     ground_truth_altimeter: false
+    floor: MatteFloor
