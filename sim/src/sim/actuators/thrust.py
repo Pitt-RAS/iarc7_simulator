@@ -37,10 +37,10 @@ class Thrust(morse.core.actuator.Actuator):
 
         max_thrust = (self._prop_max_speed * self._prop_pitch + 2) * mass_per_rev * self._prop_max_speed
 
+        self.local_data['throttle'] = min(1, max(self.local_data['throttle'], 0))
         z_velocity = self.robot_parent.bge_object.linearVelocity[2]
         prop_speed = self.local_data['throttle'] * self._prop_max_speed
         thrust = (prop_speed * self._prop_pitch - z_velocity) * mass_per_rev * prop_speed
-        thrust = min(max_thrust, max(thrust, 0))
         thrust *= self._number_of_props
 
         self.robot_parent.bge_object.applyForce((0, 0, thrust), True)
