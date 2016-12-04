@@ -7,8 +7,8 @@ from sim.builder.sensors.TopTouchSensor import TopTouchSensor
 BUMP_SENSOR_ANGLE = 0.489957
 NUM_BUMP_SENSORS = 6
 
-ROOMBA_RADIUS = 0.15
-ROOMBA_HEIGHT = 0.1
+ROOMBA_RADIUS = 0.165
+ROOMBA_HEIGHT = 0.065
 
 class Roomba(GroundRobot):
     """
