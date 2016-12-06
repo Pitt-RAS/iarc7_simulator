@@ -6,7 +6,8 @@ import math
 
 class Quadcopter(Robot):
     """
-    A template robot model for Quadcopter, with a motion controller and a pose sensor.
+    A template robot model for Quadcopter, with a motion controller and a pose
+    sensor.
     """
     def __init__(self, name = None):
 
@@ -19,8 +20,8 @@ class Quadcopter(Robot):
         ###################################
 
         self.motion = RotorcraftAttitude()
-        self.motion.properties(RollPitchPgain = 100,
-                               RollPitchDgain = 50,
+        self.motion.properties(RollPitchPgain = 1000.0,
+                               RollPitchDgain = 400.0,
                                YawPgain = 3,
                                YawDgain = 50,
                                ThrustFactor = 1,
