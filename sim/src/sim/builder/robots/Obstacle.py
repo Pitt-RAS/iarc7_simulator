@@ -6,8 +6,8 @@ from sim.builder.sensors.BumpSensor import BumpSensor
 BUMP_SENSOR_ANGLE = 0.489957
 NUM_BUMP_SENSORS = 6
 
-BASE_RADIUS = 0.15
-BASE_HEIGHT = 0.1
+BASE_RADIUS = 0.165
+BASE_HEIGHT = 0.065
 
 class Obstacle(GroundRobot):
     """

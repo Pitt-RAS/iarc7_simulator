@@ -55,9 +55,9 @@ def control_direction_callback(direction_msg):
     attitude_msg.layout.data_offset = 0
     attitude_msg.data = [
             direction_msg.data.roll,
-            direction_msg.data.pitch,
+            -direction_msg.data.pitch,
             direction_msg.data.yaw,
-            0.00001
+            0.01
         ]
 
     quad_attitude_pub.publish(attitude_msg)
