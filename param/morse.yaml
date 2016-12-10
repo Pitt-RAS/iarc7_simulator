@@ -4,3 +4,9 @@ sim:
 
     # Choose one of MatteFloor, SharperMatteFloor, GymFloor, or RealFloor
     floor: MatteFloor
+
+    # Turn cameras on/off
+    create_front_camera: true
+    create_left_camera: true
+    create_right_camera: true
+    create_bottom_camera: true
