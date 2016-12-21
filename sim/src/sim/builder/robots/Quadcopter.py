@@ -29,7 +29,7 @@ class Quadcopter(Robot):
                                YawPgain = 3,
                                YawDgain = 50,
                                ThrustFactor = 1,
-                               YawRateControl = False
+                               YawRateControl = True
                                )
         self.motion.add_stream('ros', topic='/sim/quad_attitude_controller')
         self.append(self.motion)
