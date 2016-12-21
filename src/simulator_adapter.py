@@ -56,7 +56,7 @@ def control_direction_callback(direction_msg):
     attitude_msg.data = [
             direction_msg.data.roll,
             -direction_msg.data.pitch,
-            direction_msg.data.yaw,
+            -direction_msg.data.yaw,
             0.01
         ]
 
