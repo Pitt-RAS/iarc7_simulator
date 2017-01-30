@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import rospy
 
 from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Vector3Stamped
@@ -65,24 +65,48 @@ def control_direction_callback(direction_msg):
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
-    publish_ground_truth_localization = rospy.get_param('/sim/ground_truth_localization', False)
-    publish_ground_truth_altitude = rospy.get_param('/sim/ground_truth_altitude', False)
+    # ROSPARAM
+    publish_ground_truth_localization = rospy.get_param(
+            '/sim/ground_truth_localization', False)
+    publish_ground_truth_altitude = rospy.get_param(
+            '/sim/ground_truth_altitude', False)
 
+    # MORSE SIDE COMMUNICATION
+
+    # Subscribers
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
     rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
-    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size=0)
-    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size=0)
 
-    rospy.Subscriber('uav_direction_command', OrientationThrottleStamped, control_direction_callback)
+    # Publishers
+    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller',
+                                        Float32MultiArray,
+                                        queue_size=0)
+    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller',
+                                      Float64,
+                                      queue_size=0)
+
+    # PUBLIC SIDE COMMUNICATION
+
+    # Subscribers
+    rospy.Subscriber('uav_direction_command',
+                     OrientationThrottleStamped,
+                     control_direction_callback)
+
+    # Publishers
     accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
     battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
     if publish_ground_truth_altitude:
         altitude_pub = rospy.Publisher('altitude', Float64Stamped, queue_size=0)
+
+    # TF OBJECTS
     tf2_broadcaster = tf2.TransformBroadcaster()
 
+    # RATE CONTROL
     frequency = rospy.get_param('frequency', 50)
     rate = rospy.Rate(frequency)
+
+    # MAIN LOOP
     while not rospy.is_shutdown():
         battery_pub.publish(12.6)
 
