@@ -8,10 +8,10 @@ from sim.builder.robots import Roomba, Obstacle, Quadcopter
 # Get ROS parameters
 import rospy
 floor_material_name = rospy.get_param('sim/floor')
-create_front_camera = rospy.get_param('sim/create_front_camera', True)
-create_left_camera = rospy.get_param('sim/create_left_camera', True)
-create_right_camera = rospy.get_param('sim/create_right_camera', True)
-create_bottom_camera = rospy.get_param('sim/create_bottom_camera', True)
+front_camera_resolution = rospy.get_param('sim/front_camera_resolution', None)
+left_camera_resolution = rospy.get_param('sim/left_camera_resolution', None)
+right_camera_resolution = rospy.get_param('sim/right_camera_resolution', None)
+bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
 
 roomba_placement_radius = 1
 for i in range(10):
@@ -34,10 +34,10 @@ for i in range(4):
     robot.add_default_interface('socket')
 
 robot = Quadcopter('Quadcopter',
-                   create_front_camera=create_front_camera,
-                   create_left_camera=create_left_camera,
-                   create_right_camera=create_right_camera,
-                   create_bottom_camera=create_bottom_camera)
+                   front_camera_resolution=front_camera_resolution,
+                   left_camera_resolution=left_camera_resolution,
+                   right_camera_resolution=right_camera_resolution,
+                   bottom_camera_resolution=bottom_camera_resolution)
 
 robot.translate(0, 0, 0.2)
 
