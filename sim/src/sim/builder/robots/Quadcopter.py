@@ -10,10 +10,10 @@ class Quadcopter(Robot):
     sensor.
     """
     def __init__(self, name=None,
-                 create_front_camera=True,
-                 create_left_camera=True,
-                 create_right_camera=True,
-                 create_bottom_camera=True):
+                 front_camera_resolution=None,
+                 left_camera_resolution=None,
+                 right_camera_resolution=None,
+                 bottom_camera_resolution=None):
 
         # Quadcopter.blend is located in the data/robots directory
         Robot.__init__(self, 'sim/robots/Quadcopter.blend', name)
@@ -57,50 +57,53 @@ class Quadcopter(Robot):
         self.lidar = LidarLite()
         self.lidar.translate(z=-0.1)
         self.lidar.rotate(y=math.pi/2)
-        self.lidar.add_stream('ros', 'sim.middleware.ros.lidarlite.LidarLitePublisher', topic='/altitude_raw')
+        self.lidar.add_stream('ros',
+                              'sim.middleware.ros.lidarlite.LidarLitePublisher',
+                              topic='altimeter_reading',
+                              frame='lidarlite')
         self.append(self.lidar)
 
         self.velocity = Velocity()
         self.append(self.velocity)
 
-        if create_bottom_camera:
+        if bottom_camera_resolution:
             self.bottom_camera = VideoCamera()
             self.bottom_camera.properties(
-                    cam_width=512,
-                    cam_height=512
+                    cam_width=bottom_camera_resolution[0],
+                    cam_height=bottom_camera_resolution[1]
                     )
             self.bottom_camera.translate(z=-0.2)
             self.bottom_camera.rotate(y=-math.pi/2)
             self.bottom_camera.add_stream('ros', topic='/bottom_image_raw')
             self.append(self.bottom_camera)
 
-        if create_front_camera:
+        if front_camera_resolution:
             self.front_camera = VideoCamera()
             self.front_camera.properties(
-                    cam_width=512,
-                    cam_height=512
+                    cam_width=front_camera_resolution[0],
+                    cam_height=front_camera_resolution[1]
                     )
             self.front_camera.translate(x=0.3)
             self.front_camera.rotate(y=-math.pi/6)
             self.front_camera.add_stream('ros', topic='/front_image_raw')
             self.append(self.front_camera)
 
-        if create_right_camera:
+        if right_camera_resolution:
             self.right_camera = VideoCamera()
             self.right_camera.properties(
-                    cam_width=512,
-                    cam_height=512
+                    cam_width=right_camera_resolution[0],
+                    cam_height=right_camera_resolution[1]
                     )
             self.right_camera.translate(y=0.2)
             self.right_camera.rotate(y=-math.pi/2, z=-math.pi/4)
             self.right_camera.add_stream('ros', topic='/right_image_raw')
             self.append(self.right_camera)
 
-        if create_left_camera:
+        if left_camera_resolution:
             self.left_camera = VideoCamera()
             self.left_camera.properties(
-                    cam_width=512,
-                    cam_height=512
+                    cam_width=left_camera_resolution[0],
+                    cam_height=left_camera_resolution[1]
                     )
             self.left_camera.translate(y=-0.2)
             self.left_camera.rotate(y=-math.pi/2, z=math.pi/4)

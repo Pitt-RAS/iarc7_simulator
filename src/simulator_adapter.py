@@ -1,15 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import rospy
 
-from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Vector3Stamped
-from std_msgs.msg import Float32, Float64, Float32MultiArray, Header, MultiArrayDimension
-from iarc7_msgs.msg import FlightControllerStatus, Float64Stamped, OrientationThrottleStamped
+from geometry_msgs.msg import (PointStamped,
+                               PoseStamped,
+                               PoseWithCovarianceStamped,
+                               TransformStamped,
+                               TwistStamped,
+                               Vector3Stamped)
+from std_msgs.msg import (Float32,
+                          Float64,
+                          Float32MultiArray,
+                          MultiArrayDimension)
+from iarc7_msgs.msg import (FlightControllerStatus,
+                            Float64Stamped,
+                            OrientationThrottleStamped)
 
+import tf2_geometry_msgs
 import tf2_ros as tf2
 
 def sim_accel_callback(twist_msg):
     accel_msg = Vector3Stamped()
-    accel_msg.header = Header()
     accel_msg.header.stamp = twist_msg.header.stamp
     accel_msg.header.frame_id = 'quad'
     accel_msg.vector = twist_msg.twist.linear
@@ -36,12 +46,12 @@ def sim_pose_callback(pose_msg):
         tf2_broadcaster.sendTransform(transform_msg)
 
     if publish_ground_truth_altitude:
-        altitude_msg = Float64Stamped()
-        altitude_msg.header.stamp = pose_msg.header.stamp
-        altitude_msg.header.frame_id = 'map'
-        altitude_msg.data = pose_msg.pose.position.z
-
-        altitude_pub.publish(altitude_msg)
+        # TODO: Make this also publish the altimeter_reading topic
+        # Publish altimeter_pose
+        altimeter_pose = PoseWithCovarianceStamped()
+        altimeter_pose.header.stamp = pose_msg.header.stamp
+        altimeter_pose.pose.position.z = pose_msg.pose.position.z
+        altimeter_pose_pub.publish(altimeter_pose)
 
 def control_direction_callback(direction_msg):
     # Incoming range is [0, 100], outgoing is [0, 1]
@@ -62,32 +72,102 @@ def control_direction_callback(direction_msg):
 
     quad_attitude_pub.publish(attitude_msg)
 
+def altimeter_callback(altitude_msg):
+    altitude_point = PointStamped()
+    altitude_point.point.z = altitude_msg.data
+    altitude_point.header.stamp = altitude_msg.header.stamp
+    altitude_point.header.frame_id = 'lidarlite'
+
+    try:
+        transform = tf2_buffer.lookup_transform('level_quad',
+                                                'lidarlite',
+                                                altitude_msg.header.stamp,
+                                                rospy.Duration(1.0))
+    except tf2.ExtrapolationException as ex:
+        latest_tf = tf2_buffer.lookup_transform('level_quad',
+                                                'lidarlite',
+                                                rospy.Time(0))
+        if latest_tf.header.stamp < altitude_msg.header.stamp:
+            # There's a message older than the one we're looking for, so the
+            # exception must be for extrapolation into the future, which is a
+            # problem
+            raise
+        else:
+            rospy.logwarn(
+                'Altimeter message received at time {0} before tf was available'
+                .format(altitude_msg.header.stamp))
+    else:
+        transformed_point = tf2_geometry_msgs.do_transform_point(altitude_point,
+                                                                 transform)
+
+        pose_msg = PoseWithCovarianceStamped()
+        pose_msg.header.stamp = altitude_msg.header.stamp
+        pose_msg.header.frame_id = 'map'
+        pose_msg.pose.covariance[2*6 + 2] = 0.05
+        pose_msg.pose.pose.position.z = transformed_point.point.z
+
+        altimeter_pose_pub.publish(pose_msg)
+
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
-    publish_ground_truth_localization = rospy.get_param('/sim/ground_truth_localization', False)
-    publish_ground_truth_altitude = rospy.get_param('/sim/ground_truth_altitude', False)
+    # ROSPARAM
+    publish_ground_truth_localization = rospy.get_param(
+            '/sim/ground_truth_localization', False)
+    publish_ground_truth_altitude = rospy.get_param(
+            '/sim/ground_truth_altitude', False)
 
+    # MORSE SIDE COMMUNICATION
+
+    # Subscribers
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
     rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
-    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller', Float32MultiArray, queue_size=0)
-    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller', Float64, queue_size=0)
 
-    rospy.Subscriber('uav_direction_command', OrientationThrottleStamped, control_direction_callback)
+    # Publishers
+    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller',
+                                        Float32MultiArray,
+                                        queue_size=0)
+    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller',
+                                      Float64,
+                                      queue_size=0)
+
+    # PUBLIC SIDE COMMUNICATION
+
+    # Subscribers
+    rospy.Subscriber('uav_direction_command',
+                     OrientationThrottleStamped,
+                     control_direction_callback)
+    if not publish_ground_truth_altitude:
+        # We aren't publishing the ground truth altitude, so get the altimeter
+        # reading from the topic
+        rospy.Subscriber('altimeter_reading', Float64Stamped, altimeter_callback)
+
+    # Publishers
     accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
     battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
     if publish_ground_truth_altitude:
-        altitude_pub = rospy.Publisher('altitude', Float64Stamped, queue_size=0)
-    tf2_broadcaster = tf2.TransformBroadcaster()
+        altimeter_reading_pub = rospy.Publisher('altimeter_reading',
+                                                Float64Stamped,
+                                                queue_size=0)
+    altimeter_pose_pub = rospy.Publisher('altimeter_pose',
+                                         PoseWithCovarianceStamped,
+                                         queue_size=0)
 
+    # TF OBJECTS
+    tf2_broadcaster = tf2.TransformBroadcaster()
+    tf2_buffer = tf2.Buffer()
+    tf2_listener = tf2.TransformListener(tf2_buffer)
+
+    # RATE CONTROL
     frequency = rospy.get_param('frequency', 50)
     rate = rospy.Rate(frequency)
+
+    # MAIN LOOP
     while not rospy.is_shutdown():
         battery_pub.publish(12.6)
 
         status_msg = FlightControllerStatus()
-        status_msg.header = Header()
         status_msg.header.stamp = rospy.get_rostime()
         status_msg.armed = True
         status_msg.auto_pilot = True
