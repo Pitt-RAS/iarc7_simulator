@@ -2,7 +2,11 @@
     <param name="/use_sim_time" value="true" />
     <rosparam command="load" file="$(find iarc7_simulator)/param/morse.yaml" />
 
+    <node name="lidar_static_pub" pkg="tf" type="static_transform_publisher"
+        args="0 0 -0.1 0 0 0 /quad /lidarlite 16" />
+
     <node name="morse_launcher" pkg="iarc7_simulator" type="morse_launcher.sh"
-       cwd="node" />
+        cwd="node" />
+
     <node name="simulator_adapter" pkg="iarc7_simulator" type="simulator_adapter.py" />
 </launch>

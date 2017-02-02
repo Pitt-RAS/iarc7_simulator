@@ -57,7 +57,10 @@ class Quadcopter(Robot):
         self.lidar = LidarLite()
         self.lidar.translate(z=-0.1)
         self.lidar.rotate(y=math.pi/2)
-        self.lidar.add_stream('ros', 'sim.middleware.ros.lidarlite.LidarLitePublisher', topic='/altitude_raw')
+        self.lidar.add_stream('ros',
+                              'sim.middleware.ros.lidarlite.LidarLitePublisher',
+                              topic='altimeter_reading',
+                              frame='lidarlite')
         self.append(self.lidar)
 
         self.velocity = Velocity()
