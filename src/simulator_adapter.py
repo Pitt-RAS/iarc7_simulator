@@ -73,11 +73,6 @@ def control_direction_callback(direction_msg):
     quad_attitude_pub.publish(attitude_msg)
 
 def altimeter_callback(altitude_msg):
-    altitude_point = PointStamped()
-    altitude_point.point.z = altitude_msg.data
-    altitude_point.header.stamp = altitude_msg.header.stamp
-    altitude_point.header.frame_id = 'lidarlite'
-
     try:
         transform = tf2_buffer.lookup_transform('level_quad',
                                                 'lidarlite',
@@ -97,14 +92,21 @@ def altimeter_callback(altitude_msg):
                 'Altimeter message received at time {0} before tf was available'
                 .format(altitude_msg.header.stamp))
     else:
-        transformed_point = tf2_geometry_msgs.do_transform_point(altitude_point,
+        altimeter_frame_point = PointStamped()
+        altimeter_frame_point.point.x = altitude_msg.data
+        altimeter_frame_point.header.stamp = altitude_msg.header.stamp
+        altimeter_frame_point.header.frame_id = 'lidarlite'
+
+        transformed_point = tf2_geometry_msgs.do_transform_point(altimeter_frame_point,
                                                                  transform)
 
         pose_msg = PoseWithCovarianceStamped()
         pose_msg.header.stamp = altitude_msg.header.stamp
         pose_msg.header.frame_id = 'map'
+
+        # The covariance is a 6x6 matrix (stored as an array), we want entry (2, 2)
         pose_msg.pose.covariance[2*6 + 2] = 0.05
-        pose_msg.pose.pose.position.z = transformed_point.point.z
+        pose_msg.pose.pose.position.z = -transformed_point.point.z
 
         altimeter_pose_pub.publish(pose_msg)
 
