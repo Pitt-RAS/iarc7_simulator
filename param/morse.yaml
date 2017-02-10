@@ -2,7 +2,12 @@ sim:
     ground_truth_localization: false
     ground_truth_altimeter: false
 
-    # Choose one of MatteFloor, SharperMatteFloor, GymFloor, or RealFloor
+    # Choose one of:
+    #   MatteFloor
+    #   SharperMatteFloor
+    #   EasyFloor
+    #   GymFloor
+    #   RealFloor
     floor: MatteFloor
 
     # Uncomment to turn cameras on
