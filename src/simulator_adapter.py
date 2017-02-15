@@ -11,6 +11,7 @@ from std_msgs.msg import (Float32,
                           Float64,
                           Float32MultiArray,
                           MultiArrayDimension)
+from std_srvs.srv import SetBool, SetBoolResponse
 from iarc7_msgs.msg import (FlightControllerStatus,
                             Float64Stamped,
                             OrientationThrottleStamped)
@@ -54,22 +55,28 @@ def sim_pose_callback(pose_msg):
         altimeter_pose_pub.publish(altimeter_pose)
 
 def control_direction_callback(direction_msg):
-    # Incoming range is [0, 100], outgoing is [0, 1]
-    quad_thrust_pub.publish(direction_msg.throttle * 0.01)
-
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
     attitude_msg.layout.dim[0].label = ''
     attitude_msg.layout.dim[0].size = 4
     attitude_msg.layout.dim[0].stride = 1
     attitude_msg.layout.data_offset = 0
-    attitude_msg.data = [
-            direction_msg.data.roll,
-            direction_msg.data.pitch,
-            direction_msg.data.yaw,
-            0.01
-        ]
 
+    if fc_status.armed:
+        # Incoming range is [0, 100], outgoing is [0, 1]
+        thrust_percentage = direction_msg.throttle * 0.01
+
+        attitude_msg.data = [
+                direction_msg.data.roll,
+                direction_msg.data.pitch,
+                direction_msg.data.yaw,
+                0.01
+            ]
+    else:
+        thrust_percentage = 0.0
+        attitude_msg.data = [0.0, 0.0, 0.0, 0.0]
+
+    quad_thrust_pub.publish(thrust_percentage)
     quad_attitude_pub.publish(attitude_msg)
 
 def altimeter_callback(altitude_msg):
@@ -109,6 +116,10 @@ def altimeter_callback(altitude_msg):
         pose_msg.pose.pose.position.z = -transformed_point.point.z
 
         altimeter_pose_pub.publish(pose_msg)
+
+def arm_service_handler(request):
+    fc_status.armed = request.data
+    return SetBoolResponse(success=True)
 
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
@@ -156,6 +167,13 @@ if __name__ == '__main__':
                                          PoseWithCovarianceStamped,
                                          queue_size=0)
 
+    # Services
+    fc_status = FlightControllerStatus()
+    fc_status.armed = False
+    fc_status.auto_pilot = True
+    fc_status.failsafe = False
+    rospy.Service('uav_arm', SetBool, arm_service_handler)
+
     # TF OBJECTS
     tf2_broadcaster = tf2.TransformBroadcaster()
     tf2_buffer = tf2.Buffer()
@@ -169,11 +187,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         battery_pub.publish(12.6)
 
-        status_msg = FlightControllerStatus()
-        status_msg.header.stamp = rospy.get_rostime()
-        status_msg.armed = True
-        status_msg.auto_pilot = True
-        status_msg.failsafe = False
-        status_pub.publish(status_msg)
+        fc_status.header.stamp = rospy.get_rostime()
+        status_pub.publish(fc_status)
 
         rate.sleep()
