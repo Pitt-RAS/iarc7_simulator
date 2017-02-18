@@ -30,7 +30,7 @@ class Roomba(GroundRobot):
         # Check here the other available actuators:
         # http://www.openrobots.org/morse/doc/stable/components_library.html#actuators
         self.motion = MotionVW()
-        self.motion.add_stream('ros', topic='/sim/{}/motion_vw'.format(name))
+        self.motion.add_stream('ros', topic='/sim/{}/cmd_vel'.format(name))
         self.append(self.motion)
 
         # Optionally allow to move the robot with the keyboard
