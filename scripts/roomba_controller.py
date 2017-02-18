@@ -1,28 +1,34 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python2
 
-from pymorse import Morse
+import re
 from roomba import Roomba, Obstacle
-import time
+import rospy
 
-with Morse() as simu:
-    roombas = []
-    obstacles = []
-    for robot_name in simu.robots:
-        if 'Roomba' in robot_name:
-            roombas.append(Roomba(getattr(simu, robot_name)))
-        elif 'Obstacle' in robot_name:
-            obstacles.append(Obstacle(getattr(simu, robot_name)))
+if __name__ == '__main__':
+    rospy.init_node('roomba_controller')
+
+    roomba_names = set()
+    obstacle_names = set()
+
+    for topic_name, topic_type in rospy.get_published_topics():
+        match = re.match('(/sim/obstacle[0-9]*/).+', topic_name)
+        if match:
+            obstacle_names.add(match.group(1))
+
+        match = re.match('(/sim/roomba[0-9]*/).+', topic_name)
+        if match:
+            roomba_names.add(match.group(1))
+
+    obstacles = map(Obstacle, obstacle_names)
+    roombas = map(Roomba, roomba_names)
 
     for roomba in roombas:
         roomba.send_start_signal()
     for obstacle in obstacles:
         obstacle.send_start_signal()
 
-    last_time = 0
+    rate = rospy.Rate(100)
     while True:
-        while time.time() - last_time < 0.02: pass
-        last_time = time.time()
+        rate.sleep()
         for roomba in roombas:
-            roomba.loop()
-        for obstacle in obstacles:
-            obstacle.loop()
+            roomba.update()

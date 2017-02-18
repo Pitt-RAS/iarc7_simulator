@@ -50,7 +50,7 @@ class Roomba(GroundRobot):
         angle = -float(Roomba.NUM_BUMP_SENSORS - 1) / 2 * Roomba.BUMP_SENSOR_ANGLE
         sensor_radius = Roomba.ROOMBA_RADIUS + 0.01
         for i in range(6):
-            next_bumper = BumpSensor('Bumper%i'%i)
+            next_bumper = BumpSensor()
             next_bumper.translate(sensor_radius * math.cos(angle),
                                   sensor_radius * math.sin(angle),
                                   Roomba.ROOMBA_HEIGHT / 2.0)
