@@ -15,8 +15,9 @@ bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
 
 # Place roombas
 roomba_placement_radius = 1
-for i in range(10):
-    angle = math.pi / 5 * i
+num_targets = 10
+for i in range(num_targets):
+    angle = 2*math.pi / num_targets * i
     robot = TargetRoomba('roomba%i'%i)
     robot.translate(roomba_placement_radius * math.cos(angle),
                     roomba_placement_radius * math.sin(angle),
@@ -25,8 +26,9 @@ for i in range(10):
 
 # Place obstacles
 obstacle_placement_radius = 5
-for i in range(4):
-    angle = math.pi / 2 * i
+num_obstacles = 4
+for i in range(num_obstacles):
+    angle = 2*math.pi / num_obstacles * i
     robot = Obstacle('obstacle%i'%i)
     robot.translate(obstacle_placement_radius * -math.sin(angle),
                     obstacle_placement_radius * math.cos(angle),
