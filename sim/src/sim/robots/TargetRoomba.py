@@ -1,12 +1,12 @@
 import logging; logger = logging.getLogger("morse." + __name__)
 from sim.robots.Roomba import Roomba
 
-class Obstacle(Roomba):
+class TargetRoomba(Roomba):
     """ 
-    Class definition for the Obstacle robot.
+    Class definition for the TargetRoomba robot.
     """
 
-    _name = 'Obstacle robot'
+    _name = 'TargetRoomba robot'
 
     def __init__(self, obj, parent=None):
         """ Constructor method
