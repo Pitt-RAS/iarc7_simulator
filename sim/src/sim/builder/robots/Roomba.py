@@ -43,9 +43,13 @@ class Roomba(GroundRobot):
         # Sensors
         ###################################
 
-        self.pose = Pose()
-        self.pose.add_stream('ros', topic='/sim/{}/pose'.format(name))
-        self.append(self.pose)
+        self.odom = Odometry()
+        self.odom.level('integrated')
+        self.odom.add_stream('ros',
+                             topic='/sim/{}/odom'.format(name),
+                             frame_id='map',
+                             child_frame_id='{}/base_link'.format(name))
+        self.append(self.odom)
 
         angle = -float(Roomba.NUM_BUMP_SENSORS - 1) / 2 * Roomba.BUMP_SENSOR_ANGLE
         sensor_radius = Roomba.ROOMBA_RADIUS + 0.01

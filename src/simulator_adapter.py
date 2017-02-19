@@ -1,23 +1,27 @@
 #!/usr/bin/env python2
-import rospy
 
+import re
+import rospy
+import tf2_ros as tf2
+
+from iarc7_msgs.msg import (FlightControllerStatus,
+                            Float64Stamped,
+                            OdometryArray,
+                            OrientationThrottleStamped)
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
                                TransformStamped,
                                TwistStamped,
                                Vector3Stamped)
+from nav_msgs.msg import Odometry
 from std_msgs.msg import (Float32,
                           Float64,
                           Float32MultiArray,
                           MultiArrayDimension)
 from std_srvs.srv import SetBool, SetBoolResponse
-from iarc7_msgs.msg import (FlightControllerStatus,
-                            Float64Stamped,
-                            OrientationThrottleStamped)
 
 import tf2_geometry_msgs
-import tf2_ros as tf2
 
 def sim_accel_callback(twist_msg):
     accel_msg = Vector3Stamped()
@@ -121,6 +125,38 @@ def arm_service_handler(request):
     fc_status.armed = request.data
     return SetBoolResponse(success=True)
 
+def roomba_odom_callback(msg, topic, data={}):
+    if not 'cur_odoms' in data:
+        data['cur_odoms'] = {}
+    data['cur_odoms'][topic] = msg
+
+    if 'last_time' in data:
+        earliest_publish_time = (data['last_time']
+                               + rospy.Duration(1.0/max_roomba_output_freq))
+        if earliest_publish_time > rospy.Time.now():
+            return
+
+    data['last_time'] = rospy.Time.now()
+    out_msg = OdometryArray()
+    out_msg.data = data['cur_odoms'].values()
+    roomba_pub.publish(out_msg)
+
+def obstacle_odom_callback(msg, topic, data={}):
+    if not 'cur_odoms' in data:
+        data['cur_odoms'] = {}
+    data['cur_odoms'][topic] = msg
+
+    if 'last_time' in data:
+        earliest_publish_time = (data['last_time']
+                               + rospy.Duration(1.0/max_obstacle_output_freq))
+        if earliest_publish_time > rospy.Time.now():
+            return
+
+    data['last_time'] = rospy.Time.now()
+    out_msg = OdometryArray()
+    out_msg.data = data['cur_odoms'].values()
+    obstacle_pub.publish(out_msg)
+
 if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
@@ -129,6 +165,14 @@ if __name__ == '__main__':
             '/sim/ground_truth_localization', False)
     publish_ground_truth_altitude = rospy.get_param(
             '/sim/ground_truth_altitude', False)
+    publish_ground_truth_roombas = rospy.get_param(
+            '/sim/ground_truth_roombas', False)
+    publish_ground_truth_obstacles = rospy.get_param(
+            '/sim/ground_truth_obstacles', False)
+    max_roomba_output_freq = rospy.get_param(
+            '/sim/max_roomba_output_freq', float('Inf'))
+    max_obstacle_output_freq = rospy.get_param(
+            '/sim/max_obstacle_output_freq', float('Inf'))
 
     # MORSE SIDE COMMUNICATION
 
@@ -143,6 +187,20 @@ if __name__ == '__main__':
     quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller',
                                       Float64,
                                       queue_size=0)
+    if publish_ground_truth_roombas:
+        for topic, _ in rospy.get_published_topics():
+            if re.match('/sim/roomba[0-9]*/odom', topic):
+                rospy.Subscriber(topic,
+                                 Odometry,
+                                 roomba_odom_callback,
+                                 (topic))
+    if publish_ground_truth_obstacles:
+        for topic, _ in rospy.get_published_topics():
+            if re.match('/sim/obstacle[0-9]*/odom', topic):
+                rospy.Subscriber(topic,
+                                 Odometry,
+                                 obstacle_odom_callback,
+                                 (topic))
 
     # PUBLIC SIDE COMMUNICATION
 
@@ -163,6 +221,14 @@ if __name__ == '__main__':
         altimeter_reading_pub = rospy.Publisher('altimeter_reading',
                                                 Float64Stamped,
                                                 queue_size=0)
+    if publish_ground_truth_roombas:
+        roomba_pub = rospy.Publisher('roombas',
+                                     OdometryArray,
+                                     queue_size=0)
+    if publish_ground_truth_obstacles:
+        obstacle_pub = rospy.Publisher('obstacles',
+                                       OdometryArray,
+                                       queue_size=0)
     altimeter_pose_pub = rospy.Publisher('altimeter_pose',
                                          PoseWithCovarianceStamped,
                                          queue_size=0)

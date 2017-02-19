@@ -1,6 +1,14 @@
 sim:
     ground_truth_localization: false
     ground_truth_altimeter: false
+    ground_truth_roombas: false
+    ground_truth_obstacles: false
+
+    # Because MORSE spits out messages all at the same time, if you want these
+    # to come out at MORSE's update frequency (60Hz by default), you have to
+    # make this a little larger than MORSE's frequency
+    max_roomba_output_freq: 61
+    max_obstacle_output_freq: 61
 
     # Choose one of:
     #   MatteFloor
