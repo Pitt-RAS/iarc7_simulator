@@ -67,8 +67,7 @@ def control_direction_callback(direction_msg):
     attitude_msg.layout.data_offset = 0
 
     if fc_status.armed:
-        # Incoming range is [0, 100], outgoing is [0, 1]
-        thrust_percentage = direction_msg.throttle * 0.01
+        thrust_percentage = direction_msg.throttle
 
         attitude_msg.data = [
                 -direction_msg.data.roll,
