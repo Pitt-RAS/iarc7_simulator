@@ -3,16 +3,13 @@ Simulator that allows testing of algorithms for the IARC Mission 7 competition
 
 ## Setup
 
-First, you want to clone the repo and put it in the `src` directory of your catkin workspace.  You should then be able to run `catkin_make` and have everything compile. You then need to run the following:
-
-    cd iarc7_simulator
-    morse import sim
+See [https://github.com/Pitt-RAS/iarc7_common] for install instructions.
 
 ## Running the simulator
 
 There's a roslaunch file in `launch/` that has everything you need to run the simulator.  Just run `roslaunch iarc7_simulator morse.launch`, and it will bring everything up.  If it can't find the simulator, make sure you have sourced the setup script from `devel` in the shell you're using.
 
-The roomba control script can be run with `python3 sim_client.py` from the `scripts` directory. When you want the roombas to start moving, run the script. The quadcopter can be controlled via the two `uav` topics in ROS, the same ones that `fc_comms` uses.
+The roomba control script can be run with `rosrun iarc7_simulator roomba_controller.py` after you've launched the simulator. When you want the roombas to start moving, run the script. The quadcopter can be controlled via the two `uav` topics in ROS, the same ones that `fc_comms` uses.
 
 ## Available sensors
 
