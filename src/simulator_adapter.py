@@ -51,12 +51,17 @@ def sim_pose_callback(pose_msg):
         tf2_broadcaster.sendTransform(transform_msg)
 
     if publish_ground_truth_altitude:
-        # TODO: Make this also publish the altimeter_reading topic
         # Publish altimeter_pose
         altimeter_pose = PoseWithCovarianceStamped()
         altimeter_pose.header.stamp = pose_msg.header.stamp
-        altimeter_pose.pose.position.z = pose_msg.pose.position.z
+        altimeter_pose.pose.pose.position.z = pose_msg.pose.position.z
         altimeter_pose_pub.publish(altimeter_pose)
+
+        # Publish altimeter raw height
+        altimeter_height = Float64Stamped()
+        altimeter_height.header.stamp = pose_msg.header.stamp
+        altimeter_height.data = pose_msg.pose.position.z
+        altimeter_reading_pub.publish(altimeter_height)
 
 def control_direction_callback(direction_msg):
     attitude_msg = Float32MultiArray()
