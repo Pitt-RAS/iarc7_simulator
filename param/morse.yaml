@@ -1,6 +1,6 @@
 sim:
     ground_truth_localization: false
-    ground_truth_altimeter: false
+    ground_truth_altitude: false
     ground_truth_roombas: false
     ground_truth_obstacles: false
 
