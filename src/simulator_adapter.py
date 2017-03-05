@@ -50,6 +50,16 @@ def sim_pose_callback(pose_msg):
 
         tf2_broadcaster.sendTransform(transform_msg)
 
+    if publish_ground_truth_camera_localization:
+        camera_pose_msg = PoseWithCovarianceStamped()
+        camera_pose_msg.header.stamp = pose_msg.header.stamp
+        camera_pose_msg.header.frame_id = 'map'
+        camera_pose_msg.pose.pose.position = pose_msg.pose.position
+        camera_pose_msg.pose.covariance[0*6+0] = 0.000001
+        camera_pose_msg.pose.covariance[1*6+1] = 0.000001
+        camera_pose_msg.pose.covariance[2*6+2] = 100.0
+        camera_pose_pub.publish(camera_pose_msg)
+
     if publish_ground_truth_altitude:
         # TODO: Make this also publish the altimeter_reading topic
         # Publish altimeter_pose
@@ -164,6 +174,8 @@ if __name__ == '__main__':
             '/sim/ground_truth_localization', False)
     publish_ground_truth_altitude = rospy.get_param(
             '/sim/ground_truth_altitude', False)
+    publish_ground_truth_camera_localization = rospy.get_param(
+            '/sim/ground_truth_camera_localization', False)
     publish_ground_truth_roombas = rospy.get_param(
             '/sim/ground_truth_roombas', False)
     publish_ground_truth_obstacles = rospy.get_param(
@@ -220,6 +232,10 @@ if __name__ == '__main__':
         altimeter_reading_pub = rospy.Publisher('altimeter_reading',
                                                 Float64Stamped,
                                                 queue_size=0)
+    if publish_ground_truth_camera_localization:
+        camera_pose_pub = rospy.Publisher('camera_localized_pose',
+                                          PoseWithCovarianceStamped,
+                                          queue_size=0)
     if publish_ground_truth_roombas:
         roomba_pub = rospy.Publisher('roombas',
                                      OdometryArray,
