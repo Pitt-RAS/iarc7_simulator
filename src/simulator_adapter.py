@@ -65,7 +65,7 @@ def sim_pose_callback(pose_msg):
         # Publish altimeter_pose
         altimeter_pose = PoseWithCovarianceStamped()
         altimeter_pose.header.stamp = pose_msg.header.stamp
-        altimeter_pose.pose.position.z = pose_msg.pose.position.z
+        altimeter_pose.pose.pose.position.z = pose_msg.pose.position.z
         altimeter_pose_pub.publish(altimeter_pose)
 
 def control_direction_callback(direction_msg):
