@@ -1,4 +1,19 @@
 <launch>
     <node name="lidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
         args="0 0 -0.1 0 1.5708 0 /quad /lidarlite" />
+
+    <node name="ground_plane_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="0 0 -0.25 0 0 0 /quad /base_footprint" />
+
+    <node name="foot1_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="0.21 0.21 0 0 0 0 /base_footprint /foot1 " />
+
+    <node name="foot2_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="-0.21 0.21 0 0 0 0 /base_footprint /foot2 " />
+
+    <node name="foot3_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="0.21 -0.21 0 0 0 0 /base_footprint /foot3 " />
+
+    <node name="foot4_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="-0.21 -0.21 0 0 0 0 /base_footprint /foot4 " />
 </launch>
