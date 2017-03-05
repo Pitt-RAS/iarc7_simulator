@@ -1,6 +1,0 @@
-<launch>
-    <param name="/use_sim_time" value="true" />
-    <rosparam command="load" file="$(find iarc7_simulator)/param/morse.yaml" />
-
-    <node name="simulator_adapter" pkg="iarc7_simulator" type="simulator_adapter.py" />
-</launch>
