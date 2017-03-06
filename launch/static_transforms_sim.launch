@@ -3,7 +3,7 @@
         args="0 0 -0.1 0 1.5708 0 /quad /lidarlite" />
 
     <node name="ground_plane_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 -0.25 0 0 0 /quad /base_footprint" />
+        args="0 0 -0.2183 0 0 0 /quad /base_footprint" />
 
     <node name="foot1_static_pub" pkg="tf2_ros" type="static_transform_publisher"
         args="0.21 0.21 0 0 0 0 /base_footprint /foot1 " />
