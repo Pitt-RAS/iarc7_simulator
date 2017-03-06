@@ -1,8 +1,27 @@
 #! /usr/bin/env python2
 
 import re
-from roomba import Roomba, Obstacle
 import rospy
+
+from iarc7_msgs.msg import BoolStamped
+from iarc7_msgs.srv import SetBoolOn, SetBoolOnResponse
+
+from roomba import Roomba, Obstacle
+
+def top_touch_service_handler(request):
+    # Don't use exception checking here because we also need to check for
+    # keys less than 0
+    id = int(request.id)
+    if id > -1 and id < len(roomba_top_tap_publishers):
+        message = BoolStamped()
+        message.header.stamp = rospy.Time.now()
+        message.data = request.data
+        roomba_top_tap_publishers[id].publish(message)
+        return SetBoolOnResponse(success=True)
+    else:
+        error_msg = 'Tap requested on non-existant roomba'
+        rospy.logerr(error_msg)
+        return SetBoolOnResponse(success=False, message=error_msg)
 
 if __name__ == '__main__':
     rospy.init_node('roomba_controller')
@@ -21,6 +40,17 @@ if __name__ == '__main__':
 
     obstacles = map(Obstacle, obstacle_names)
     roombas = map(Roomba, roomba_names)
+
+    roomba_names = sorted(roomba_names)
+
+    roomba_top_tap_publishers = []
+    for roomba in roomba_names:
+        pub = rospy.Publisher('{}top_touch'.format(roomba),
+                              BoolStamped,
+                              queue_size=0)
+        roomba_top_tap_publishers.append(pub)
+
+    rospy.Service('/sim/roomba_top_switch_tap', SetBoolOn, top_touch_service_handler)
 
     for roomba in roombas:
         roomba.send_start_signal()
