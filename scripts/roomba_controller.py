@@ -9,19 +9,16 @@ from iarc7_msgs.srv import SetBoolOn, SetBoolOnResponse
 from roomba import Roomba, Obstacle
 
 def top_touch_service_handler(request):
-    # Don't use exception checking here because we also need to check for
-    # keys less than 0
-    id = int(request.id)
-    if id > -1 and id < len(roomba_top_tap_publishers):
+    try:
         message = BoolStamped()
         message.header.stamp = rospy.Time.now()
         message.data = request.data
-        roomba_top_tap_publishers[id].publish(message)
-        return SetBoolOnResponse(success=True)
-    else:
-        error_msg = 'Tap requested on non-existant roomba'
+        roomba_bump_publishers[request.id].publish(message)
+    except KeyError:
+        error_msg = 'Tap requested on non-existant roomba: {}'.format(request.id)
         rospy.logerr(error_msg)
         return SetBoolOnResponse(success=False, message=error_msg)
+    return SetBoolOnResponse(success=True)
 
 if __name__ == '__main__':
     rospy.init_node('roomba_controller')
@@ -38,19 +35,27 @@ if __name__ == '__main__':
         if match:
             roomba_names.add(match.group(1))
 
-    obstacles = map(Obstacle, obstacle_names)
-    roombas = map(Roomba, roomba_names)
+    roomba_bump_publishers = dict()
 
-    roomba_names = sorted(roomba_names)
-
-    roomba_top_tap_publishers = []
     for roomba in roomba_names:
-        pub = rospy.Publisher('{}top_touch'.format(roomba),
+        name = '{}top_touch'.format(roomba)
+        pub = rospy.Publisher(name,
                               BoolStamped,
                               queue_size=0)
-        roomba_top_tap_publishers.append(pub)
+        index = re.sub('^\/sim\/', '', name)
+        roomba_bump_publishers[index] = pub
+
+        name = '{}bumper'.format(roomba)
+        pub = rospy.Publisher('{}0'.format(name),
+                              BoolStamped,
+                              queue_size=0)
+        index = re.sub('^\/sim\/', '', name)
+        roomba_bump_publishers[index] = pub
 
     rospy.Service('/sim/roomba_top_switch_tap', SetBoolOn, top_touch_service_handler)
+
+    obstacles = map(Obstacle, obstacle_names)
+    roombas = map(Roomba, roomba_names)
 
     for roomba in roombas:
         roomba.send_start_signal()
