@@ -6,10 +6,10 @@ from iarc7_msgs.msg import BoolStamped
 from iarc7_msgs.srv import SetBoolOn, SetBoolOnRequest
 
 if __name__ == '__main__':
-    rospy.init_node('test_top_switch_tap')
+    rospy.init_node('test_roomba_bumper_tap')
 
-    rospy.wait_for_service('/sim/roomba_top_switch_tap')
-    tap_service = rospy.ServiceProxy('/sim/roomba_top_switch_tap', SetBoolOn)
+    rospy.wait_for_service('/sim/roomba_bumper_tap')
+    tap_service = rospy.ServiceProxy('/sim/roomba_bumper_tap', SetBoolOn)
 
     for i in range(-3,13):
         roomba = 'roomba{}'.format(str(i))

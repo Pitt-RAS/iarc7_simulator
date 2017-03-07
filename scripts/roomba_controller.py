@@ -52,7 +52,7 @@ if __name__ == '__main__':
         index = re.sub('^\/sim\/', '', name)
         roomba_bump_publishers[index] = pub
 
-    rospy.Service('/sim/roomba_top_switch_tap', SetBoolOn, top_touch_service_handler)
+    rospy.Service('/sim/roomba_bumper_tap', SetBoolOn, top_touch_service_handler)
 
     obstacles = map(Obstacle, obstacle_names)
     roombas = map(Roomba, roomba_names)
