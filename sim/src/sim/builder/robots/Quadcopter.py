@@ -31,7 +31,7 @@ class Quadcopter(Robot):
                                ThrustFactor = 1.0,
                                YawRateControl = True
                                )
-        self.motion.add_stream('ros', topic='/sim/quad_attitude_controller')
+        self.motion.add_stream('ros', topic='/sim/quad/attitude_controller')
         self.append(self.motion)
 
         self.thrust = Thrust()
@@ -41,19 +41,27 @@ class Quadcopter(Robot):
                                PropMaxSpeed = 12214 / 60.0)
         self.thrust.add_stream('ros',
                                'sim.middleware.ros.thrust.ThrustReader',
-                               topic='/sim/quad_thrust_controller')
+                               topic='/sim/quad/thrust_controller')
         self.append(self.thrust)
 
         ###################################
         # Sensors
         ###################################
 
+        self.odom = Odometry()
+        self.odom.level('integrated')
+        self.odom.add_stream('ros',
+                             topic='/sim/quad/odom',
+                             frame_id='map',
+                             child_frame_id='level_quad')
+        self.append(self.odom)
+
         self.pose = Pose()
-        self.pose.add_stream('ros', topic='/sim/pose')
+        self.pose.add_stream('ros', topic='/sim/quad/pose')
         self.append(self.pose)
 
         self.accel = Accelerometer()
-        self.accel.add_stream('ros', topic='/sim/quad_accel')
+        self.accel.add_stream('ros', topic='/sim/quad/accel')
         self.append(self.accel)
 
         self.lidar = LidarLite()
