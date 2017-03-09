@@ -37,6 +37,7 @@ def sim_odom_callback(odom_msg):
     odom_msg.pose.pose.orientation = Quaternion()
     odom_msg.pose.pose.orientation.w = 1.0
     odom_msg.twist.twist.angular = Vector3()
+    odom_msg.child_frame_id = 'level_quad'
     odom_pub.publish(odom_msg)
 
 def sim_pose_callback(pose_msg):
