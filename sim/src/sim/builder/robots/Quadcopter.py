@@ -53,7 +53,7 @@ class Quadcopter(Robot):
         self.odom.add_stream('ros',
                              topic='/sim/quad/odom',
                              frame_id='map',
-                             child_frame_id='level_quad')
+                             child_frame_id='sim/quad/odom')
         self.append(self.odom)
 
         self.pose = Pose()
