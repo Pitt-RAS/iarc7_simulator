@@ -48,6 +48,14 @@ class Quadcopter(Robot):
         # Sensors
         ###################################
 
+        self.odom = Odometry()
+        self.odom.level('integrated')
+        self.odom.add_stream('ros',
+                             topic='/sim/quad/odom',
+                             frame_id='map',
+                             child_frame_id='level_quad')
+        self.append(self.odom)
+
         self.pose = Pose()
         self.pose.add_stream('ros', topic='/sim/pose')
         self.append(self.pose)

@@ -11,8 +11,10 @@ from iarc7_msgs.msg import (FlightControllerStatus,
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
+                               Quaternion,
                                TransformStamped,
                                TwistStamped,
+                               Vector3,
                                Vector3Stamped)
 from nav_msgs.msg import Odometry
 from std_msgs.msg import (Float32,
@@ -30,6 +32,12 @@ def sim_accel_callback(twist_msg):
     accel_msg.vector = twist_msg.twist.linear
 
     accel_pub.publish(accel_msg)
+
+def sim_odom_callback(odom_msg):
+    odom_msg.pose.pose.orientation = Quaternion()
+    odom_msg.pose.pose.orientation.w = 1.0
+    odom_msg.twist.twist.angular = Vector3()
+    odom_pub.publish(odom_msg)
 
 def sim_pose_callback(pose_msg):
     transform_msg = TransformStamped()
@@ -190,6 +198,8 @@ if __name__ == '__main__':
     # Subscribers
     rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
     rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
+    if publish_ground_truth_localization:
+        rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
 
     # Publishers
     quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller',
@@ -228,6 +238,8 @@ if __name__ == '__main__':
     accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
     battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
+    if publish_ground_truth_localization:
+        odom_pub = rospy.Publisher('odometry/filtered', Odometry, queue_size=10)
     if publish_ground_truth_altitude:
         altimeter_reading_pub = rospy.Publisher('altimeter_reading',
                                                 Float64Stamped,
