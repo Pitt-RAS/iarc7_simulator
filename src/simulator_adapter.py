@@ -196,16 +196,16 @@ if __name__ == '__main__':
     # MORSE SIDE COMMUNICATION
 
     # Subscribers
-    rospy.Subscriber('/sim/pose', PoseStamped, sim_pose_callback)
-    rospy.Subscriber('/sim/quad_accel', TwistStamped, sim_accel_callback)
+    rospy.Subscriber('/sim/quad/pose', PoseStamped, sim_pose_callback)
+    rospy.Subscriber('/sim/quad/accel', TwistStamped, sim_accel_callback)
     if publish_ground_truth_localization:
         rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
 
     # Publishers
-    quad_attitude_pub = rospy.Publisher('/sim/quad_attitude_controller',
+    quad_attitude_pub = rospy.Publisher('/sim/quad/attitude_controller',
                                         Float32MultiArray,
                                         queue_size=0)
-    quad_thrust_pub = rospy.Publisher('/sim/quad_thrust_controller',
+    quad_thrust_pub = rospy.Publisher('/sim/quad/thrust_controller',
                                       Float64,
                                       queue_size=0)
     if publish_ground_truth_roombas:
