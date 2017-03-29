@@ -17,8 +17,7 @@ from geometry_msgs.msg import (PointStamped,
                                Vector3,
                                Vector3Stamped)
 from nav_msgs.msg import Odometry
-from std_msgs.msg import (Float32,
-                          Float64,
+from std_msgs.msg import (Float64,
                           Float32MultiArray,
                           MultiArrayDimension)
 from std_srvs.srv import SetBool, SetBoolResponse
@@ -237,7 +236,7 @@ if __name__ == '__main__':
 
     # Publishers
     accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
-    battery_pub = rospy.Publisher('fc_battery', Float32, queue_size=0)
+    battery_pub = rospy.Publisher('fc_battery', Float64Stamped, queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
     if publish_ground_truth_localization:
         odom_pub = rospy.Publisher('odometry/filtered', Odometry, queue_size=10)
@@ -279,7 +278,10 @@ if __name__ == '__main__':
 
     # MAIN LOOP
     while not rospy.is_shutdown():
-        battery_pub.publish(12.6)
+        battery_msg = Float64Stamped()
+        battery_msg.data = 12.6
+        battery_msg.header.stamp = rospy.Time.now()
+        battery_pub.publish(battery_msg)
 
         fc_status.header.stamp = rospy.get_rostime()
         status_pub.publish(fc_status)
