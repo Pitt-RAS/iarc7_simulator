@@ -17,7 +17,8 @@ sim:
     #   EasyFloor
     #   GymFloor
     #   RealFloor
-    floor: MatteFloor
+    #   RealFloorV2
+    floor: RealFloorV2
 
     # Uncomment to turn cameras on
     # front_camera_resolution: [1920, 1080]
