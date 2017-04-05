@@ -13,6 +13,7 @@ class Quadcopter(Robot):
                  front_camera_resolution=None,
                  left_camera_resolution=None,
                  right_camera_resolution=None,
+                 back_camera_resolution=None,
                  bottom_camera_resolution=None):
 
         # Quadcopter.blend is located in the data/robots directory
@@ -83,8 +84,11 @@ class Quadcopter(Robot):
                     cam_height=bottom_camera_resolution[1]
                     )
             self.bottom_camera.translate(z=-0.2)
-            self.bottom_camera.rotate(y=-math.pi/2)
-            self.bottom_camera.add_stream('ros', topic='/bottom_image_raw')
+            self.bottom_camera.rotation_euler = (math.pi, 0, -math.pi/2)
+            self.bottom_camera.add_stream('ros',
+                                          topic='/bottom_image_raw',
+                                          frame_id='bottom_camera_optical',
+                                          parent_frame_id='quad')
             self.append(self.bottom_camera)
 
         if front_camera_resolution:
@@ -93,21 +97,12 @@ class Quadcopter(Robot):
                     cam_width=front_camera_resolution[0],
                     cam_height=front_camera_resolution[1]
                     )
-            self.front_camera.translate(x=0.3)
-            self.front_camera.rotate(y=-math.pi/6)
-            self.front_camera.add_stream('ros', topic='/front_image_raw')
+            self.front_camera.translate(x=0.2)
+            self.front_camera.add_stream('ros',
+                                         topic='/front_image_raw',
+                                         frame_id='front_camera_optical',
+                                         parent_frame_id='quad')
             self.append(self.front_camera)
-
-        if right_camera_resolution:
-            self.right_camera = VideoCamera()
-            self.right_camera.properties(
-                    cam_width=right_camera_resolution[0],
-                    cam_height=right_camera_resolution[1]
-                    )
-            self.right_camera.translate(y=0.2)
-            self.right_camera.rotate(y=-math.pi/2, z=-math.pi/4)
-            self.right_camera.add_stream('ros', topic='/right_image_raw')
-            self.append(self.right_camera)
 
         if left_camera_resolution:
             self.left_camera = VideoCamera()
@@ -115,7 +110,38 @@ class Quadcopter(Robot):
                     cam_width=left_camera_resolution[0],
                     cam_height=left_camera_resolution[1]
                     )
-            self.left_camera.translate(y=-0.2)
-            self.left_camera.rotate(y=-math.pi/2, z=math.pi/4)
-            self.left_camera.add_stream('ros', topic='/left_image_raw')
+            self.left_camera.translate(y=0.2)
+            self.left_camera.rotate(x=math.pi/2)
+            self.left_camera.add_stream('ros',
+                                        topic='/left_image_raw',
+                                        frame_id='left_camera_optical',
+                                        parent_frame_id='quad')
             self.append(self.left_camera)
+
+        if right_camera_resolution:
+            self.right_camera = VideoCamera()
+            self.right_camera.properties(
+                    cam_width=right_camera_resolution[0],
+                    cam_height=right_camera_resolution[1]
+                    )
+            self.right_camera.translate(y=-0.2)
+            self.right_camera.rotate(x=-math.pi/2)
+            self.right_camera.add_stream('ros',
+                                         topic='/right_image_raw',
+                                         frame_id='right_camera_optical',
+                                         parent_frame_id='quad')
+            self.append(self.right_camera)
+
+        if back_camera_resolution:
+            self.back_camera = VideoCamera()
+            self.back_camera.properties(
+                    cam_width=back_camera_resolution[0],
+                    cam_height=back_camera_resolution[1]
+                    )
+            self.back_camera.translate(x=-0.2)
+            self.back_camera.rotate(x=math.pi)
+            self.back_camera.add_stream('ros',
+                                         topic='/back_image_raw',
+                                         frame_id='back_camera_optical',
+                                         parent_frame_id='quad')
+            self.append(self.back_camera)

@@ -11,6 +11,7 @@ floor_material_name = rospy.get_param('sim/floor')
 front_camera_resolution = rospy.get_param('sim/front_camera_resolution', None)
 left_camera_resolution = rospy.get_param('sim/left_camera_resolution', None)
 right_camera_resolution = rospy.get_param('sim/right_camera_resolution', None)
+back_camera_resolution = rospy.get_param('sim/back_camera_resolution', None)
 bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
 
 # Place roombas
@@ -40,6 +41,7 @@ robot = Quadcopter('Quadcopter',
                    front_camera_resolution=front_camera_resolution,
                    left_camera_resolution=left_camera_resolution,
                    right_camera_resolution=right_camera_resolution,
+                   back_camera_resolution=back_camera_resolution,
                    bottom_camera_resolution=bottom_camera_resolution)
 robot.translate(0, 0, 0.2)
 
