@@ -14,7 +14,8 @@ class Quadcopter(Robot):
                  left_camera_resolution=None,
                  right_camera_resolution=None,
                  back_camera_resolution=None,
-                 bottom_camera_resolution=None):
+                 bottom_camera_resolution=None,
+                 create_teleport_actuator=False):
 
         # Quadcopter.blend is located in the data/robots directory
         Robot.__init__(self, 'sim/robots/Quadcopter.blend', name)
@@ -24,26 +25,31 @@ class Quadcopter(Robot):
         # Actuators
         ###################################
 
-        self.motion = RotorcraftAttitude()
-        self.motion.properties(RollPitchPgain = 5000.0,
-                               RollPitchDgain = 800.0,
-                               YawPgain = 10000.0,
-                               YawDgain = 1000.0,
-                               ThrustFactor = 1.0,
-                               YawRateControl = True
-                               )
-        self.motion.add_stream('ros', topic='/sim/quad/attitude_controller')
-        self.append(self.motion)
+        if create_teleport_actuator:
+            self.teleport = Teleport()
+            self.teleport.add_stream('ros', topic='/sim/quad/teleport')
+            self.append(self.teleport)
+        else:
+            self.motion = RotorcraftAttitude()
+            self.motion.properties(RollPitchPgain = 5000.0,
+                                   RollPitchDgain = 800.0,
+                                   YawPgain = 10000.0,
+                                   YawDgain = 1000.0,
+                                   ThrustFactor = 1.0,
+                                   YawRateControl = True
+                                   )
+            self.motion.add_stream('ros', topic='/sim/quad/attitude_controller')
+            self.append(self.motion)
 
-        self.thrust = Thrust()
-        self.thrust.properties(NumberOfProps = 4,
-                               PropDiameter = 0.25,
-                               PropPitch = 0.1,
-                               PropMaxSpeed = 12214 / 60.0)
-        self.thrust.add_stream('ros',
-                               'sim.middleware.ros.thrust.ThrustReader',
-                               topic='/sim/quad/thrust_controller')
-        self.append(self.thrust)
+            self.thrust = Thrust()
+            self.thrust.properties(NumberOfProps = 4,
+                                   PropDiameter = 0.25,
+                                   PropPitch = 0.1,
+                                   PropMaxSpeed = 12214 / 60.0)
+            self.thrust.add_stream('ros',
+                                   'sim.middleware.ros.thrust.ThrustReader',
+                                   topic='/sim/quad/thrust_controller')
+            self.append(self.thrust)
 
         ###################################
         # Sensors
