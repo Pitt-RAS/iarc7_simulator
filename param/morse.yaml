@@ -21,8 +21,8 @@ sim:
     floor: RealFloorV2
 
     # Uncomment to turn cameras on
-    # front_camera_resolution: [1920, 1080]
-    # left_camera_resolution: [1920, 1080]
-    # right_camera_resolution: [1920, 1080]
-    # back_camera_resolution: [1920, 1080]
-    # bottom_camera_resolution: [1920, 1080]
+    # front_camera_resolution: [1920, 1080, 60]
+    # left_camera_resolution: [1920, 1080, 60]
+    # right_camera_resolution: [1920, 1080, 60]
+    # back_camera_resolution: [1920, 1080, 60]
+    # bottom_camera_resolution: [1920, 1080, 60]

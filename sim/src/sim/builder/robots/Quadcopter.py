@@ -85,6 +85,7 @@ class Quadcopter(Robot):
                     )
             self.bottom_camera.translate(z=-0.2)
             self.bottom_camera.rotation_euler = (math.pi, 0, -math.pi/2)
+            self.bottom_camera.frequency(bottom_camera_resolution[2])
             self.bottom_camera.add_stream('ros',
                                           topic='/bottom_image_raw',
                                           frame_id='bottom_camera_optical',
@@ -98,6 +99,7 @@ class Quadcopter(Robot):
                     cam_height=front_camera_resolution[1]
                     )
             self.front_camera.translate(x=0.2)
+            self.front_camera.frequency(front_camera_resolution[2])
             self.front_camera.add_stream('ros',
                                          topic='/front_image_raw',
                                          frame_id='front_camera_optical',
@@ -112,6 +114,7 @@ class Quadcopter(Robot):
                     )
             self.left_camera.translate(y=0.2)
             self.left_camera.rotate(x=math.pi/2)
+            self.left_camera.frequency(left_camera_resolution[2])
             self.left_camera.add_stream('ros',
                                         topic='/left_image_raw',
                                         frame_id='left_camera_optical',
@@ -126,6 +129,7 @@ class Quadcopter(Robot):
                     )
             self.right_camera.translate(y=-0.2)
             self.right_camera.rotate(x=-math.pi/2)
+            self.right_camera.frequency(right_camera_resolution[2])
             self.right_camera.add_stream('ros',
                                          topic='/right_image_raw',
                                          frame_id='right_camera_optical',
