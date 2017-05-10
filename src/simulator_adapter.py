@@ -4,8 +4,10 @@ import re
 import rospy
 import tf2_ros as tf2
 
-from iarc7_msgs.msg import (FlightControllerStatus,
+from iarc7_msgs.msg import (BoolStamped,
+                            FlightControllerStatus,
                             Float64Stamped,
+                            LandingGearContactsStamped,
                             OdometryArray,
                             OrientationThrottleStamped)
 from geometry_msgs.msg import (PointStamped,
@@ -75,6 +77,18 @@ def sim_pose_callback(pose_msg):
         altimeter_pose.header.stamp = pose_msg.header.stamp
         altimeter_pose.pose.pose.position.z = pose_msg.pose.position.z
         altimeter_pose_pub.publish(altimeter_pose)
+
+def sim_front_switch_callback(msg):
+    switches.front = msg.data
+
+def sim_back_switch_callback(msg):
+    switches.back = msg.data
+
+def sim_left_switch_callback(msg):
+    switches.left = msg.data
+
+def sim_right_switch_callback(msg):
+    switches.right = msg.data
 
 def control_direction_callback(direction_msg):
     attitude_msg = Float32MultiArray()
@@ -200,6 +214,10 @@ if __name__ == '__main__':
     rospy.Subscriber('/sim/quad/accel', TwistStamped, sim_accel_callback)
     if publish_ground_truth_localization:
         rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
+    rospy.Subscriber('/sim/switch_front', BoolStamped, sim_front_switch_callback)
+    rospy.Subscriber('/sim/switch_back', BoolStamped, sim_back_switch_callback)
+    rospy.Subscriber('/sim/switch_left', BoolStamped, sim_left_switch_callback)
+    rospy.Subscriber('/sim/switch_right', BoolStamped, sim_right_switch_callback)
 
     # Publishers
     quad_attitude_pub = rospy.Publisher('/sim/quad/attitude_controller',
@@ -259,12 +277,11 @@ if __name__ == '__main__':
     altimeter_pose_pub = rospy.Publisher('altimeter_pose',
                                          PoseWithCovarianceStamped,
                                          queue_size=0)
+    switches_pub = rospy.Publisher('landing_gear_contacts',
+                                   LandingGearContactsStamped,
+                                   queue_size=0)
 
     # Services
-    fc_status = FlightControllerStatus()
-    fc_status.armed = False
-    fc_status.auto_pilot = True
-    fc_status.failsafe = False
     rospy.Service('uav_arm', SetBool, arm_service_handler)
 
     # TF OBJECTS
@@ -276,6 +293,18 @@ if __name__ == '__main__':
     frequency = rospy.get_param('frequency', 50)
     rate = rospy.Rate(frequency)
 
+    # MESSAGES
+    fc_status = FlightControllerStatus()
+    fc_status.armed = False
+    fc_status.auto_pilot = True
+    fc_status.failsafe = False
+
+    switches = LandingGearContactsStamped()
+    switches.front = False
+    switches.back = False
+    switches.left = False
+    switches.right = False
+
     # MAIN LOOP
     while not rospy.is_shutdown():
         battery_msg = Float64Stamped()
@@ -285,5 +314,8 @@ if __name__ == '__main__':
 
         fc_status.header.stamp = rospy.get_rostime()
         status_pub.publish(fc_status)
+
+        switches.header.stamp = rospy.get_rostime()
+        switches_pub.publish(switches)
 
         rate.sleep()

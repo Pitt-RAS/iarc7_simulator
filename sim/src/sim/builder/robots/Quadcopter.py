@@ -1,10 +1,15 @@
 from morse.builder import *
 from sim.builder.actuators.thrust import Thrust
 from sim.builder.sensors.LidarLite import LidarLite
+from sim.builder.sensors.ContactSwitch import ContactSwitch
 
 import math
 
 class Quadcopter(Robot):
+
+    QUAD_CENTER_HEIGHT = 0.21349
+    QUAD_FOOT_SQUARE_TRANSLATION = 0.21
+
     """
     A template robot model for Quadcopter, with a motion controller and a pose
     sensor.
@@ -79,6 +84,21 @@ class Quadcopter(Robot):
                               topic='altimeter_reading',
                               frame='lidarlite')
         self.append(self.lidar)
+
+        for translate in (((0, 1), 'front'),
+                          ((0, -1), 'back'),
+                          ((1, 0), 'right'),
+                          ((-1, 0), 'left')):
+            next_switch = ContactSwitch()
+            next_switch.translate(Quadcopter.QUAD_FOOT_SQUARE_TRANSLATION * translate[0][1],
+                                  -Quadcopter.QUAD_FOOT_SQUARE_TRANSLATION * translate[0][0],
+                                  -Quadcopter.QUAD_CENTER_HEIGHT)
+            next_switch.rotate(0, math.pi/2, 0)
+            next_switch.add_stream(
+                    'ros',
+                    'sim.middleware.ros.bump_sensor.BumpSensorPublisher',
+                    topic='/sim/switch_{}'.format(translate[1]))
+            self.append(next_switch)
 
         self.velocity = Velocity()
         self.append(self.velocity)
