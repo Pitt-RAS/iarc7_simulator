@@ -85,6 +85,15 @@ class Quadcopter(Robot):
                               frame='lidarlite')
         self.append(self.lidar)
 
+        self.sharpir = LidarLite()
+        self.sharpir.translate(z=-0.01, x=0.1)
+        self.sharpir.rotate(y=math.pi/2)
+        self.sharpir.add_stream('ros',
+                                'sim.middleware.ros.lidarlite.LidarLitePublisher',
+                                topic='short_range_altimeter_reading',
+                                frame='sharp_ir')
+        self.append(self.sharpir)
+
         self.laserscanner = LaserSensorWithArc()
         self.laserscanner.properties(laser_range=6.0)
         self.laserscanner.properties(resolution=1.0)

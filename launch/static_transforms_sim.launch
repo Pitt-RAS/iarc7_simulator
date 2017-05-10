@@ -5,6 +5,9 @@
     <node name="lidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
         args="0 0 -0.1 0 1.5708 0 /quad /lidarlite" />
 
+    <node name="sharpir_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="0.1 0 -0.01 0 1.5708 0 /quad /sharp_ir" />
+
     <node name="rplidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
         args="0 0 0 0 0 0 /quad /base_laser_link" />
 
