@@ -85,6 +85,14 @@ class Quadcopter(Robot):
                               frame='lidarlite')
         self.append(self.lidar)
 
+        self.laserscanner = LaserSensorWithArc()
+        self.laserscanner.properties(laser_range=6.0)
+        self.laserscanner.properties(resolution=1.0)
+        self.laserscanner.properties(scan_window=360.0)
+        self.laserscanner.frequency(10.0)
+        self.laserscanner.add_stream('ros', topic='scan')
+        self.append(self.laserscanner)
+
         for translate in (((0, 1), 'front'),
                           ((0, -1), 'back'),
                           ((1, 0), 'right'),

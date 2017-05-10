@@ -5,6 +5,9 @@
     <node name="lidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
         args="0 0 -0.1 0 1.5708 0 /quad /lidarlite" />
 
+    <node name="rplidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
+        args="0 0 0 0 0 0 /quad /base_laser_link" />
+
     <node name="ground_plane_static_pub" pkg="tf2_ros" type="static_transform_publisher"
         args="0 0 -0.2183 0 0 0 /quad /base_footprint" />
 
