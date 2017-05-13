@@ -13,6 +13,7 @@ left_camera_resolution = rospy.get_param('sim/left_camera_resolution', None)
 right_camera_resolution = rospy.get_param('sim/right_camera_resolution', None)
 back_camera_resolution = rospy.get_param('sim/back_camera_resolution', None)
 bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
+create_teleport_actuator = rospy.get_param('sim/create_teleport_actuator', False)
 
 # Place roombas
 roomba_placement_radius = 1
@@ -42,7 +43,8 @@ robot = Quadcopter('Quadcopter',
                    left_camera_resolution=left_camera_resolution,
                    right_camera_resolution=right_camera_resolution,
                    back_camera_resolution=back_camera_resolution,
-                   bottom_camera_resolution=bottom_camera_resolution)
+                   bottom_camera_resolution=bottom_camera_resolution,
+                   create_teleport_actuator=create_teleport_actuator)
 robot.translate(0, 0, 0.2)
 
 # Add /clock publisher
