@@ -116,7 +116,7 @@ def control_direction_callback(direction_msg):
     quad_attitude_pub.publish(attitude_msg)
 
 def altimeter_callback(altitude_msg):
-    _altimeter_callback(altitude_msg, 0.05, altimeter_pose_pub)
+    _altimeter_callback(altitude_msg, 0.3, altimeter_pose_pub)
 
 def short_range_altimeter_callback(altitude_msg):
     _altimeter_callback(altitude_msg, (0.05 * altitude_msg.data**2)**2, short_range_altimeter_pose_pub)
