@@ -11,6 +11,9 @@ sim:
     max_roomba_output_freq: 61
     max_obstacle_output_freq: 61
 
+    num_roombas: 10
+    num_obstacles: 4
+
     # Choose one of:
     #   MatteFloor
     #   SharperMatteFloor
