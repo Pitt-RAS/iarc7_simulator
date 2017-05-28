@@ -213,6 +213,8 @@ if __name__ == '__main__':
             '/sim/max_roomba_output_freq', float('Inf'))
     max_obstacle_output_freq = rospy.get_param(
             '/sim/max_obstacle_output_freq', float('Inf'))
+    num_roombas = rospy.get_param('/sim/num_roombas', 0)
+    num_obstacles = rospy.get_param('/sim/num_obstacles', 0)
 
     # MORSE SIDE COMMUNICATION
 
@@ -234,19 +236,17 @@ if __name__ == '__main__':
                                       Float64,
                                       queue_size=0)
     if publish_ground_truth_roombas:
-        for topic, _ in rospy.get_published_topics():
-            if re.match('/sim/roomba[0-9]*/odom', topic):
-                rospy.Subscriber(topic,
-                                 Odometry,
-                                 roomba_odom_callback,
-                                 (topic))
+        for i in range(num_roombas):
+            rospy.Subscriber('/sim/roomba{}/odom'.format(i),
+                             Odometry,
+                             roomba_odom_callback,
+                             ('/sim/roomba{}/odom'.format(i),))
     if publish_ground_truth_obstacles:
-        for topic, _ in rospy.get_published_topics():
-            if re.match('/sim/obstacle[0-9]*/odom', topic):
-                rospy.Subscriber(topic,
-                                 Odometry,
-                                 obstacle_odom_callback,
-                                 (topic))
+        for i in range(num_obstacles):
+            rospy.Subscriber('/sim/obstacle{}/odom'.format(i),
+                             Odometry,
+                             obstacle_odom_callback,
+                             ('/sim/obstacle{}/odom'.format(i),))
 
     # PUBLIC SIDE COMMUNICATION
 
