@@ -265,7 +265,7 @@ if __name__ == '__main__':
     # Publishers
     accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
     fc_battery_pub = rospy.Publisher('fc_battery', Float64Stamped, queue_size=0)
-    control_board_battery_pub = rospy.Publisher('control_board_battery',
+    motor_battery_pub = rospy.Publisher('motor_battery',
                                                 Float64Stamped,
                                                 queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
@@ -334,7 +334,7 @@ if __name__ == '__main__':
         fc_battery_pub.publish(battery_msg)
 
         battery_msg.data = 12.6
-        control_board_battery_pub.publish(battery_msg)
+        motor_battery_pub.publish(battery_msg)
 
         fc_status.header.stamp = rospy.get_rostime()
         status_pub.publish(fc_status)
