@@ -1,6 +1,7 @@
 import math
 from morse.builder import *
 from sim.builder.sensors.BumpSensor import BumpSensor
+from sim.builder.sensors.OdometryAbsolutePose import OdometryAbsolutePose
 
 class Roomba(GroundRobot):
     """
@@ -43,9 +44,9 @@ class Roomba(GroundRobot):
         # Sensors
         ###################################
 
-        self.odom = Odometry()
-        self.odom.level('integrated')
+        self.odom = OdometryAbsolutePose()
         self.odom.add_stream('ros',
+                             'morse.middleware.ros.odometry.OdometryPublisher',
                              topic='/sim/{}/odom'.format(name),
                              frame_id='map',
                              child_frame_id='{}/base_link'.format(name))
