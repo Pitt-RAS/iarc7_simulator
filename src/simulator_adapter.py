@@ -298,7 +298,7 @@ if __name__ == '__main__':
             'short_range_altimeter_pose',
             PoseWithCovarianceStamped,
             queue_size=0)
-    switches_pub = rospy.Publisher('landing_gear_contacts',
+    switches_pub = rospy.Publisher('landing_gear_contact_switches',
                                    LandingGearContactsStamped,
                                    queue_size=0)
 
