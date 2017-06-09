@@ -77,6 +77,7 @@ class Quadcopter(Robot):
         self.append(self.accel)
 
         self.lidar = LidarLite()
+        self.lidar.properties(min_range=0.0, max_range=100.0)
         self.lidar.translate(z=-0.1)
         self.lidar.rotate(y=math.pi/2)
         self.lidar.add_stream('ros',
@@ -86,6 +87,7 @@ class Quadcopter(Robot):
         self.append(self.lidar)
 
         self.sharpir = LidarLite()
+        self.sharpir.properties(min_range=0.0, max_range=0.8)
         self.sharpir.translate(z=-0.01, x=0.1)
         self.sharpir.rotate(y=math.pi/2)
         self.sharpir.add_stream('ros',

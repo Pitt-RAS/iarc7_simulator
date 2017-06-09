@@ -19,6 +19,7 @@ from geometry_msgs.msg import (PointStamped,
                                Vector3,
                                Vector3Stamped)
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Range
 from std_msgs.msg import (Float64,
                           Float32MultiArray,
                           MultiArrayDimension)
@@ -122,6 +123,10 @@ def short_range_altimeter_callback(altitude_msg):
     _altimeter_callback(altitude_msg, (0.05 * altitude_msg.data**2)**2, short_range_altimeter_pose_pub)
 
 def _altimeter_callback(altitude_msg, cov, pub):
+    if (altitude_msg.range < altitude_msg.min_range
+     or altitude_msg.range > altitude_msg.max_range):
+        return
+
     try:
         transform = tf2_buffer.lookup_transform('level_quad',
                                                 altitude_msg.header.frame_id,
@@ -142,7 +147,7 @@ def _altimeter_callback(altitude_msg, cov, pub):
                 .format(altitude_msg.header.stamp))
     else:
         altimeter_frame_point = PointStamped()
-        altimeter_frame_point.point.x = altitude_msg.data
+        altimeter_frame_point.point.x = altitude_msg.range
         altimeter_frame_point.header.stamp = altitude_msg.header.stamp
         altimeter_frame_point.header.frame_id = altitude_msg.header.frame_id
 
@@ -257,9 +262,9 @@ if __name__ == '__main__':
     if not publish_ground_truth_altitude:
         # We aren't publishing the ground truth altitude, so get the altimeter
         # reading from the topic
-        rospy.Subscriber('altimeter_reading', Float64Stamped, altimeter_callback)
+        rospy.Subscriber('altimeter_reading', Range, altimeter_callback)
         rospy.Subscriber('short_range_altimeter_reading',
-                         Float64Stamped,
+                         Range,
                          short_range_altimeter_callback)
 
     # Publishers
@@ -273,11 +278,11 @@ if __name__ == '__main__':
         odom_pub = rospy.Publisher('odometry/filtered', Odometry, queue_size=10)
     if publish_ground_truth_altitude:
         altimeter_reading_pub = rospy.Publisher('altimeter_reading',
-                                                Float64Stamped,
+                                                Range,
                                                 queue_size=0)
         short_range_altimeter_reading_pub = rospy.Publisher(
                 'short_range_altimeter_reading',
-                Float64Stamped,
+                Range,
                 queue_size=0)
     if publish_ground_truth_camera_localization:
         camera_pose_pub = rospy.Publisher('camera_localized_pose',

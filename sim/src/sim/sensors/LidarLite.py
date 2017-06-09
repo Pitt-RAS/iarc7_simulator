@@ -14,6 +14,9 @@ class LidarLite(morse.core.sensor.Sensor):
 
     add_data('range', float('NaN'), 'float', 'Range reading')
 
+    add_property('min_range', 0.0, 'min_range')
+    add_property('max_range', float('Inf'), 'max_range')
+
     def __init__(self, obj, parent=None):
         logger.info("%s initialization" % obj.name)
         morse.core.sensor.Sensor.__init__(self, obj, parent)
