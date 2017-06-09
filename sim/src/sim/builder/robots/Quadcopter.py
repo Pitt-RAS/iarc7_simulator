@@ -92,7 +92,7 @@ class Quadcopter(Robot):
         self.sharpir.rotate(y=math.pi/2)
         self.sharpir.add_stream('ros',
                                 'sim.middleware.ros.lidarlite.LidarLitePublisher',
-                                topic='short_range_altimeter_reading',
+                                topic='short_distance_lidar',
                                 frame='sharp_ir')
         self.append(self.sharpir)
 

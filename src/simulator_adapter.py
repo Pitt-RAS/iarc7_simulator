@@ -117,10 +117,10 @@ def control_direction_callback(direction_msg):
     quad_attitude_pub.publish(attitude_msg)
 
 def altimeter_callback(altitude_msg):
-    _altimeter_callback(altitude_msg, 0.3, altimeter_pose_pub)
+    _altimeter_callback(altitude_msg, 0.0009, altimeter_pose_pub)
 
 def short_range_altimeter_callback(altitude_msg):
-    _altimeter_callback(altitude_msg, (0.05 * altitude_msg.data**2)**2, short_range_altimeter_pose_pub)
+    _altimeter_callback(altitude_msg, 0.0001, short_range_altimeter_pose_pub)
 
 def _altimeter_callback(altitude_msg, cov, pub):
     if (altitude_msg.range < altitude_msg.min_range
@@ -263,7 +263,7 @@ if __name__ == '__main__':
         # We aren't publishing the ground truth altitude, so get the altimeter
         # reading from the topic
         rospy.Subscriber('altimeter_reading', Range, altimeter_callback)
-        rospy.Subscriber('short_range_altimeter_reading',
+        rospy.Subscriber('short_distance_lidar',
                          Range,
                          short_range_altimeter_callback)
 
@@ -281,7 +281,7 @@ if __name__ == '__main__':
                                                 Range,
                                                 queue_size=0)
         short_range_altimeter_reading_pub = rospy.Publisher(
-                'short_range_altimeter_reading',
+                'short_distance_lidar',
                 Range,
                 queue_size=0)
     if publish_ground_truth_camera_localization:
@@ -300,7 +300,7 @@ if __name__ == '__main__':
                                          PoseWithCovarianceStamped,
                                          queue_size=0)
     short_range_altimeter_pose_pub = rospy.Publisher(
-            'short_range_altimeter_pose',
+            'short_distance_lidar_pose',
             PoseWithCovarianceStamped,
             queue_size=0)
     switches_pub = rospy.Publisher('landing_gear_contact_switches',
