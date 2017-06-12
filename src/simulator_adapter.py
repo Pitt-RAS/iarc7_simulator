@@ -15,7 +15,6 @@ from geometry_msgs.msg import (PointStamped,
                                PoseWithCovarianceStamped,
                                Quaternion,
                                TransformStamped,
-                               TwistStamped,
                                Vector3,
                                Vector3Stamped)
 from nav_msgs.msg import Odometry
@@ -26,14 +25,6 @@ from std_msgs.msg import (Float64,
 from std_srvs.srv import SetBool, SetBoolResponse
 
 import tf2_geometry_msgs
-
-def sim_accel_callback(twist_msg):
-    accel_msg = Vector3Stamped()
-    accel_msg.header.stamp = twist_msg.header.stamp
-    accel_msg.header.frame_id = 'quad'
-    accel_msg.vector = twist_msg.twist.linear
-
-    accel_pub.publish(accel_msg)
 
 def sim_odom_callback(odom_msg):
     odom_msg.pose.pose.orientation = Quaternion()
@@ -225,7 +216,6 @@ if __name__ == '__main__':
 
     # Subscribers
     rospy.Subscriber('/sim/quad/pose', PoseStamped, sim_pose_callback)
-    rospy.Subscriber('/sim/quad/accel', TwistStamped, sim_accel_callback)
     if publish_ground_truth_localization:
         rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
     rospy.Subscriber('/sim/switch_front', BoolStamped, sim_front_switch_callback)
@@ -268,7 +258,6 @@ if __name__ == '__main__':
                          short_range_altimeter_callback)
 
     # Publishers
-    accel_pub = rospy.Publisher('acceleration', Vector3Stamped, queue_size=0)
     fc_battery_pub = rospy.Publisher('fc_battery', Float64Stamped, queue_size=0)
     motor_battery_pub = rospy.Publisher('motor_battery',
                                                 Float64Stamped,

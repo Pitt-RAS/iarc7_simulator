@@ -72,9 +72,9 @@ class Quadcopter(Robot):
         self.pose.add_stream('ros', topic='/sim/quad/pose')
         self.append(self.pose)
 
-        self.accel = Accelerometer()
-        self.accel.add_stream('ros', topic='/sim/quad/accel')
-        self.append(self.accel)
+        self.imu = IMU()
+        self.imu.add_stream('ros', topic='/fc_imu', frame_id='quad')
+        self.append(self.imu)
 
         self.lidar = LidarLite()
         self.lidar.properties(min_range=0.0, max_range=100.0)
