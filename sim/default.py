@@ -68,3 +68,10 @@ env.set_camera_rotation([1.09, 0, -1.14])
 import bpy
 mat = bpy.data.materials.get(floor_material_name)
 bpy.data.objects['Plane'].data.materials[0] = mat
+
+# Alternate roomba colors
+green_mat = bpy.data.materials.get("Gloss Banner Green")
+red_mat = bpy.data.materials.get("Gloss Banner Red")
+mats = [green_mat, red_mat]
+for i in range(num_targets):
+    bpy.data.objects["roomba%d"%i].data.materials[1] = mats[i%2]
