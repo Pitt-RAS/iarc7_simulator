@@ -9,7 +9,7 @@ class Roomba(GroundRobot):
     """
 
     ROOMBA_RADIUS = 0.165
-    ROOMBA_HEIGHT = 0.065
+    ROOMBA_HEIGHT = 0.095
 
     # Angle occupied by one sensor in radians
     BUMP_SENSOR_ANGLE = 0.489957
