@@ -132,7 +132,8 @@ class Quadcopter(Robot):
             self.bottom_camera.rotation_euler = (math.pi, 0, -math.pi/2)
             self.bottom_camera.frequency(bottom_camera_resolution[2])
             self.bottom_camera.add_stream('ros',
-                                          topic='/bottom_image_raw',
+                                          topic='/bottom_camera/camera',
+                                          topic_suffix='/image_raw',
                                           frame_id='bottom_camera_optical',
                                           parent_frame_id='quad')
             self.append(self.bottom_camera)
@@ -146,7 +147,8 @@ class Quadcopter(Robot):
             self.front_camera.translate(x=0.2)
             self.front_camera.frequency(front_camera_resolution[2])
             self.front_camera.add_stream('ros',
-                                         topic='/front_image_raw',
+                                         topic='/front_camera/camera',
+                                         topic_suffix='/image_raw',
                                          frame_id='front_camera_optical',
                                          parent_frame_id='quad')
             self.append(self.front_camera)
@@ -161,7 +163,8 @@ class Quadcopter(Robot):
             self.left_camera.rotate(x=math.pi/2)
             self.left_camera.frequency(left_camera_resolution[2])
             self.left_camera.add_stream('ros',
-                                        topic='/left_image_raw',
+                                        topic='/left_camera/camera',
+                                        topic_suffix='/image_raw',
                                         frame_id='left_camera_optical',
                                         parent_frame_id='quad')
             self.append(self.left_camera)
@@ -176,7 +179,8 @@ class Quadcopter(Robot):
             self.right_camera.rotate(x=-math.pi/2)
             self.right_camera.frequency(right_camera_resolution[2])
             self.right_camera.add_stream('ros',
-                                         topic='/right_image_raw',
+                                         topic='/right_camera/camera',
+                                         topic_suffix='/image_raw',
                                          frame_id='right_camera_optical',
                                          parent_frame_id='quad')
             self.append(self.right_camera)
@@ -190,7 +194,8 @@ class Quadcopter(Robot):
             self.back_camera.translate(x=-0.2)
             self.back_camera.rotate(x=math.pi)
             self.back_camera.add_stream('ros',
-                                         topic='/back_image_raw',
+                                         topic='/back_camera/camera',
+                                         topic_suffix='/image_raw',
                                          frame_id='back_camera_optical',
                                          parent_frame_id='quad')
             self.append(self.back_camera)
