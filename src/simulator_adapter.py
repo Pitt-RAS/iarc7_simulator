@@ -1,7 +1,9 @@
 #!/usr/bin/env python2
 
+import math
 import re
 import rospy
+import tf.transformations
 import tf2_ros as tf2
 
 from iarc7_msgs.msg import (BoolStamped,
@@ -9,6 +11,7 @@ from iarc7_msgs.msg import (BoolStamped,
                             Float64Stamped,
                             LandingGearContactsStamped,
                             OdometryArray,
+                            OrientationAnglesStamped,
                             OrientationThrottleStamped)
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
@@ -34,13 +37,28 @@ def sim_odom_callback(odom_msg):
     odom_pub.publish(odom_msg)
 
 def sim_pose_callback(pose_msg):
-    transform_msg = TransformStamped()
-    transform_msg.header.stamp = pose_msg.header.stamp
-    transform_msg.header.frame_id = 'level_quad'
-    transform_msg.child_frame_id = 'quad'
-    transform_msg.transform.rotation = pose_msg.pose.orientation
+    orientation_msg = OrientationAnglesStamped()
+    orientation_msg.header.stamp = pose_msg.header.stamp
 
-    tf2_broadcaster.sendTransform(transform_msg)
+    orientation = pose_msg.pose.orientation
+    roll, pitch, yaw = tf.transformations.euler_from_quaternion((orientation.x,
+                                                                 orientation.y,
+                                                                 orientation.z,
+                                                                 orientation.w))
+    orientation_msg.data.roll = roll
+    orientation_msg.data.pitch = -pitch
+    orientation_msg.data.yaw = (2*math.pi - yaw) % (2*math.pi)
+
+    orientation_pub.publish(orientation_msg)
+
+    if publish_ground_truth_orientation:
+        transform_msg = TransformStamped()
+        transform_msg.header.stamp = pose_msg.header.stamp
+        transform_msg.header.frame_id = 'level_quad'
+        transform_msg.child_frame_id = 'quad'
+        transform_msg.transform.rotation = pose_msg.pose.orientation
+
+        tf2_broadcaster.sendTransform(transform_msg)
 
     if publish_ground_truth_localization:
         transform_msg = TransformStamped()
@@ -195,6 +213,8 @@ if __name__ == '__main__':
     rospy.init_node('simulator_adapter')
 
     # ROSPARAM
+    publish_ground_truth_orientation = rospy.get_param(
+            '/sim/ground_truth_orientation', False)
     publish_ground_truth_localization = rospy.get_param(
             '/sim/ground_truth_localization', False)
     publish_ground_truth_altitude = rospy.get_param(
@@ -263,6 +283,9 @@ if __name__ == '__main__':
                                                 Float64Stamped,
                                                 queue_size=0)
     status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
+    orientation_pub = rospy.Publisher('fc_orientation',
+                                      OrientationAnglesStamped,
+                                      queue_size=10)
     if publish_ground_truth_localization:
         odom_pub = rospy.Publisher('odometry/filtered', Odometry, queue_size=10)
     if publish_ground_truth_altitude:
