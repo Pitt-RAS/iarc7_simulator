@@ -12,10 +12,10 @@ pose.position.y = float(sys.argv[2])
 pose.position.z = float(sys.argv[3])
 
 orientation = quaternion_from_euler(*map(float, sys.argv[4:7]), axes='rzyx')
-pose.orientation.w = orientation[0]
-pose.orientation.x = orientation[1]
-pose.orientation.y = orientation[2]
-pose.orientation.z = orientation[3]
+pose.orientation.x = orientation[0]
+pose.orientation.y = orientation[1]
+pose.orientation.z = orientation[2]
+pose.orientation.w = orientation[3]
 
 rospy.loginfo(pose)
 pub = rospy.Publisher('sim/quad/teleport', Pose, latch=True, queue_size=1)
