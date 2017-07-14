@@ -23,6 +23,7 @@ class Quadcopter(Robot):
                  create_teleport_actuator=False):
 
         # Quadcopter.blend is located in the data/robots directory
+        #Robot.__init__(self, 'sim/robots/Quadcopter_Fast.blend', name)
         Robot.__init__(self, 'sim/robots/Quadcopter.blend', name)
         self.properties(classpath = "sim.robots.Quadcopter.Quadcopter")
 
