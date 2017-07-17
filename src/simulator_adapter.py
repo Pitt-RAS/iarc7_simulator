@@ -25,7 +25,7 @@ from sensor_msgs.msg import Range
 from std_msgs.msg import (Float64,
                           Float32MultiArray,
                           MultiArrayDimension)
-from std_srvs.srv import SetBool, SetBoolResponse
+from iarc7_msgs.srv import Arm, ArmResponse
 
 import tf2_geometry_msgs
 
@@ -175,7 +175,7 @@ def _altimeter_callback(altitude_msg, cov, pub):
 
 def arm_service_handler(request):
     fc_status.armed = request.data
-    return SetBoolResponse(success=True)
+    return ArmResponse(success=True)
 
 def roomba_odom_callback(msg, topic, data={}):
     if not 'cur_odoms' in data:
@@ -320,7 +320,7 @@ if __name__ == '__main__':
                                    queue_size=0)
 
     # Services
-    rospy.Service('uav_arm', SetBool, arm_service_handler)
+    rospy.Service('uav_arm', Arm, arm_service_handler)
 
     # TF OBJECTS
     tf2_broadcaster = tf2.TransformBroadcaster()
