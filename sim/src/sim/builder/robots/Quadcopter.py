@@ -102,7 +102,7 @@ class Quadcopter(Robot):
         self.laserscanner.properties(resolution=1.0)
         self.laserscanner.properties(scan_window=360.0)
         self.laserscanner.frequency(10.0)
-        self.laserscanner.add_stream('ros', topic='scan')
+        self.laserscanner.add_stream('ros', topic='scan', frame_id='laser')
         self.append(self.laserscanner)
 
         for translate in (((0, 1), 'front'),
