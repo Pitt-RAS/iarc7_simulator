@@ -10,6 +10,8 @@ from iarc7_msgs.msg import (BoolStamped,
                             FlightControllerStatus,
                             Float64Stamped,
                             LandingGearContactsStamped,
+                            Obstacle,
+                            ObstacleArray,
                             OdometryArray,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped)
@@ -205,8 +207,17 @@ def obstacle_odom_callback(msg, topic, data={}):
             return
 
     data['last_time'] = rospy.Time.now()
-    out_msg = OdometryArray()
-    out_msg.data = data['cur_odoms'].values()
+    out_msg = ObstacleArray()
+    out_msg.header.stamp = msg.header.stamp
+    for odom in data['cur_odoms'].values():
+        obst = Obstacle()
+        obst.header.stamp = msg.header.stamp
+        obst.odom = odom
+        obst.base_radius = 0.17
+        obst.base_height = 0.07
+        obst.pipe_radius = 0.05
+        obst.pipe_height = 2.0
+        out_msg.obstacles.append(obst)
     obstacle_pub.publish(out_msg)
 
 if __name__ == '__main__':
@@ -306,7 +317,7 @@ if __name__ == '__main__':
                                      queue_size=0)
     if publish_ground_truth_obstacles:
         obstacle_pub = rospy.Publisher('obstacles',
-                                       OdometryArray,
+                                       ObstacleArray,
                                        queue_size=0)
     altimeter_pose_pub = rospy.Publisher('altimeter_pose',
                                          PoseWithCovarianceStamped,
