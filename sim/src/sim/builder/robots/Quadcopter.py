@@ -135,7 +135,7 @@ class Quadcopter(Robot):
             self.bottom_camera.add_stream('ros',
                                           topic='/bottom_camera/rgb',
                                           topic_suffix='/image_raw',
-                                          frame_id='bottom_camera_rgb_optical',
+                                          frame_id='bottom_camera_rgb_optical_frame',
                                           parent_frame_id='quad')
             self.append(self.bottom_camera)
 
@@ -150,7 +150,7 @@ class Quadcopter(Robot):
             self.front_camera.add_stream('ros',
                                          topic='/front_camera/rgb',
                                          topic_suffix='/image_raw',
-                                         frame_id='front_camera_rgb_optical',
+                                         frame_id='front_camera_rgb_optical_frame',
                                          parent_frame_id='quad')
             self.append(self.front_camera)
 
@@ -166,7 +166,7 @@ class Quadcopter(Robot):
             self.left_camera.add_stream('ros',
                                         topic='/left_camera/rgb',
                                         topic_suffix='/image_raw',
-                                        frame_id='left_camera_rgb_optical',
+                                        frame_id='left_camera_rgb_optical_frame',
                                         parent_frame_id='quad')
             self.append(self.left_camera)
 
@@ -182,7 +182,7 @@ class Quadcopter(Robot):
             self.right_camera.add_stream('ros',
                                          topic='/right_camera/rgb',
                                          topic_suffix='/image_raw',
-                                         frame_id='right_camera_rgb_optical',
+                                         frame_id='right_camera_rgb_optical_frame',
                                          parent_frame_id='quad')
             self.append(self.right_camera)
 
@@ -197,6 +197,6 @@ class Quadcopter(Robot):
             self.back_camera.add_stream('ros',
                                          topic='/back_camera/rgb',
                                          topic_suffix='/image_raw',
-                                         frame_id='back_camera_rgb_optical',
+                                         frame_id='back_camera_rgb_optical_frame',
                                          parent_frame_id='quad')
             self.append(self.back_camera)
