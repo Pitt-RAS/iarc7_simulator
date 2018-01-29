@@ -23,13 +23,19 @@ from geometry_msgs.msg import (PointStamped,
                                Vector3,
                                Vector3Stamped)
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Range
+from sensor_msgs.msg import Image, Range
 from std_msgs.msg import (Float64,
                           Float32MultiArray,
                           MultiArrayDimension)
 from iarc7_msgs.srv import Arm, ArmResponse
 
 import tf2_geometry_msgs
+
+def sim_camera_callback(msg, pub):
+    img = bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+    out_msg = bridge.cv2_to_imgmsg(img, encoding='rgb8')
+    out_msg.header = msg.header
+    pub.publish(out_msg)
 
 def sim_odom_callback(odom_msg):
     odom_msg.pose.pose.orientation = Quaternion()
@@ -243,6 +249,17 @@ if __name__ == '__main__':
     num_roombas = rospy.get_param('/sim/num_roombas', 0)
     num_obstacles = rospy.get_param('/sim/num_obstacles', 0)
 
+    front_camera_on = bool(rospy.get_param(
+            '/sim/front_camera_resolution', False))
+    left_camera_on = bool(rospy.get_param(
+            '/sim/left_camera_resolution', False))
+    right_camera_on = bool(rospy.get_param(
+            '/sim/right_camera_resolution', False))
+    back_camera_on = bool(rospy.get_param(
+            '/sim/back_camera_resolution', False))
+    bottom_camera_on = bool(rospy.get_param(
+            '/sim/bottom_camera_resolution', False))
+
     # MORSE SIDE COMMUNICATION
 
     # Subscribers
@@ -329,6 +346,56 @@ if __name__ == '__main__':
     switches_pub = rospy.Publisher('landing_gear_contact_switches',
                                    LandingGearContactsStamped,
                                    queue_size=0)
+
+    # CAMERA STUFF
+    if (front_camera_on
+     or left_camera_on
+     or right_camera_on
+     or back_camera_on
+     or bottom_camera_on):
+        import cv_bridge
+        bridge = cv_bridge.CvBridge()
+
+    if front_camera_on:
+        front_camera_pub = rospy.Publisher('/front_camera/rgb/image_raw',
+                                           Image,
+                                           queue_size=10)
+        rospy.Subscriber('/sim/front_camera/image_raw',
+                         Image,
+                         lambda msg: sim_camera_callback(msg,
+                                                         front_camera_pub))
+    if left_camera_on:
+        left_camera_pub = rospy.Publisher('/left_camera/rgb/image_raw',
+                                           Image,
+                                           queue_size=10)
+        rospy.Subscriber('/sim/left_camera/image_raw',
+                         Image,
+                         lambda msg: sim_camera_callback(msg,
+                                                         left_camera_pub))
+    if right_camera_on:
+        right_camera_pub = rospy.Publisher('/right_camera/rgb/image_raw',
+                                           Image,
+                                           queue_size=10)
+        rospy.Subscriber('/sim/right_camera/image_raw',
+                         Image,
+                         lambda msg: sim_camera_callback(msg,
+                                                         right_camera_pub))
+    if back_camera_on:
+        back_camera_pub = rospy.Publisher('/back_camera/rgb/image_raw',
+                                           Image,
+                                           queue_size=10)
+        rospy.Subscriber('/sim/back_camera/image_raw',
+                         Image,
+                         lambda msg: sim_camera_callback(msg,
+                                                         back_camera_pub))
+    if bottom_camera_on:
+        bottom_camera_pub = rospy.Publisher('/bottom_camera/rgb/image_raw',
+                                           Image,
+                                           queue_size=10)
+        rospy.Subscriber('/sim/bottom_camera/image_raw',
+                         Image,
+                         lambda msg: sim_camera_callback(msg,
+                                                         bottom_camera_pub))
 
     # Services
     rospy.Service('uav_arm', Arm, arm_service_handler)
