@@ -1,2 +1,2 @@
 from .thrust import Thrust
-from .planarThrustpy import Planarthrustpy
+from .planarThrust import Planarthrust
