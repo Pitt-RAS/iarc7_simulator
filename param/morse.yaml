@@ -33,3 +33,6 @@ sim:
     # bottom_camera_resolution: [1280, 960, 60]
 
     create_teleport_actuator: false
+
+    # If this is a regular Quadrotor (not from senior design) make this false
+    prototype_uav: true
