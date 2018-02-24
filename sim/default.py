@@ -3,7 +3,7 @@
 import math
 from morse.builder import Clock, Environment, FakeRobot
 from morse.core.morse_time import TimeStrategies
-from sim.builder.robots import TargetRoomba, Obstacle, Quadcopter
+from sim.builder.robots import TargetRoomba, Obstacle, Quadcopter, X525
 
 # Get ROS parameters
 import rospy
@@ -14,10 +14,10 @@ right_camera_resolution = rospy.get_param('sim/right_camera_resolution', None)
 back_camera_resolution = rospy.get_param('sim/back_camera_resolution', None)
 bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
 create_teleport_actuator = rospy.get_param('sim/create_teleport_actuator', False)
-prototype_uav = rospy.get_param('sim/prototype_uav', False)
+prototype_uav = rospy.get_param('sim/prototype_uav', True)
 
 #Don't populate arena if this is the prototype
-if ~prototype_uav:
+if False:
     # Place roombas
     roomba_placement_radius = 1
     num_targets = 10
