@@ -17,10 +17,11 @@ create_teleport_actuator = rospy.get_param('sim/create_teleport_actuator', False
 prototype_uav = rospy.get_param('sim/prototype_uav', True)
 
 #Don't populate arena if this is the prototype
-if False:
-    # Place roombas
-    roomba_placement_radius = 1
-    num_targets = 10
+# Place roombas
+roomba_placement_radius = 1
+num_targets = 10
+
+if not prototype_uav:
     for i in range(num_targets):
         angle = 2*math.pi / num_targets * i
         robot = TargetRoomba('roomba%i'%i)
@@ -49,6 +50,7 @@ if False:
                     bottom_camera_resolution=bottom_camera_resolution,
                     create_teleport_actuator=create_teleport_actuator)
     robot.translate(0, 0, 0.2)
+
 elif prototype_uav:
     robot = X525('X525',
                     front_camera_resolution=front_camera_resolution,
@@ -75,14 +77,14 @@ env.set_time_strategy(TimeStrategies.FixedSimulationStep)
 env.set_camera_location([-18.0, -6.7, 10.8])
 env.set_camera_rotation([1.09, 0, -1.14])
 
-if ~prototype_uav:
-    # Set floor material
-    # Must be run after environment is loaded
-    import bpy
-    mat = bpy.data.materials.get(floor_material_name)
-    bpy.data.objects['Plane'].data.materials[0] = mat
+# Set floor material
+# Must be run after environment is loaded
+import bpy
+mat = bpy.data.materials.get(floor_material_name)
+bpy.data.objects['Plane'].data.materials[0] = mat
 
-    # Alternate roomba colors
+# Alternate roomba colors
+if not prototype_uav:
     green_mat = bpy.data.materials.get("Gloss Banner Green")
     red_mat = bpy.data.materials.get("Gloss Banner Red")
     mats = [green_mat, red_mat]

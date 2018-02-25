@@ -23,6 +23,7 @@ class PlanarThrust(morse.core.actuator.Actuator):
     add_property('_prop_pitch', 0.1, 'PropPitch', 'float',
                  'Pitch of a propellor (in m)')
     add_property('_prop_max_speed', 100.0, 'PropMaxSpeed', 'float',
+                 'Max speed of a propellor (in revs / s)')
     add_property('_prop_angle',0, 'PropAngle', 'float',
                  'angle of propeller in rad in x-y plane from origin')
 
@@ -35,11 +36,12 @@ class PlanarThrust(morse.core.actuator.Actuator):
         prop_area = math.pi * (self._prop_diameter / 2)**2
         volume_per_rev = self._prop_pitch * prop_area
         mass_per_rev = AIR_DENSITY * volume_per_rev
+        angle = self._prop_angle
 
         self.local_data['throttle'] = min(1, max(self.local_data['throttle'], 0))
 
-        x_velocity = self.robot_parent.bge_object.linearVelocity[0]*cos(_prop_angle)
-        y_velocity = self.robot_parent.bge_object.linearVelocity[1]*sin(_prop_angle)
+        x_velocity = self.robot_parent.bge_object.linearVelocity[0]*math.cos(angle)
+        y_velocity = self.robot_parent.bge_object.linearVelocity[1]*math.sin(angle)
         velocity = x_velocity + y_velocity
 
         prop_speed = self.local_data['throttle'] * self._prop_max_speed

@@ -14,7 +14,8 @@ from iarc7_msgs.msg import (BoolStamped,
                             ObstacleArray,
                             OdometryArray,
                             OrientationAnglesStamped,
-                            OrientationThrottleStamped)
+                            OrientationThrottleStamped,
+                            PlanarThrottleStamped)
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
@@ -109,7 +110,7 @@ def sim_left_switch_callback(msg):
 def sim_right_switch_callback(msg):
     switches.right = msg.data
 
-def control_direction_callback(direction_msg):
+def control_direction_callback(direction_msg,planar_direction_msg):
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
     attitude_msg.layout.dim[0].label = ''
@@ -119,6 +120,11 @@ def control_direction_callback(direction_msg):
 
     if fc_status.armed:
         thrust_percentage = direction_msg.throttle
+        planar_thrust =[planar_direction_msg.front_throttle,
+                        planar_direction_msg.back_throttle,
+                        planar_direction_msg.left_throttle,
+                        planar_direction_msg.right_throttle
+                ]
 
         attitude_msg.data = [
                 -direction_msg.data.roll,
@@ -129,9 +135,15 @@ def control_direction_callback(direction_msg):
     else:
         thrust_percentage = 0.0
         attitude_msg.data = [0.0, 0.0, 0.0, 0.0]
+        planar_thrust = [0.0, 0.0, 0.0, 0.0]
 
     quad_thrust_pub.publish(thrust_percentage)
     quad_attitude_pub.publish(attitude_msg)
+
+    quad_front_thrust_pub.publish(planar_thrust[0])
+    quad_back_thrust_pub.publish(planar_thrust[1])
+    quad_left_thrust_pub.publish(planar_thrust[2])
+    quad_right_thrust_pub.publish(planar_thrust[3])
 
 def altimeter_callback(altitude_msg):
     _altimeter_callback(altitude_msg, 0.0009, altimeter_pose_pub)
@@ -260,6 +272,9 @@ if __name__ == '__main__':
     bottom_camera_on = bool(rospy.get_param(
             '/sim/bottom_camera_resolution', False))
 
+    publish_prototype_uav = rospy.get_param(
+            '/sim/prototype_uav', False)
+
     # MORSE SIDE COMMUNICATION
 
     # Subscribers
@@ -278,6 +293,25 @@ if __name__ == '__main__':
     quad_thrust_pub = rospy.Publisher('/sim/quad/thrust_controller',
                                       Float64,
                                       queue_size=0)
+
+
+    if publish_prototype_uav:
+        quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        quad_back_thrust_pub = rospy.Publisher('/sim/quad/back_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        quad_left_thrust_pub = rospy.Publisher('/sim/quad/left_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        quad_right_thrust_pub = rospy.Publisher('/sim/quad/right_thrust_controller',
+                Float64,
+                queue_size=0)
+
     if publish_ground_truth_roombas:
         for i in range(num_roombas):
             rospy.Subscriber('/sim/roomba{}/odom'.format(i),
@@ -296,6 +330,7 @@ if __name__ == '__main__':
     # Subscribers
     rospy.Subscriber('uav_direction_command',
                      OrientationThrottleStamped,
+                     PlanarThrottleStamped,
                      control_direction_callback)
     if not publish_ground_truth_altitude:
         # We aren't publishing the ground truth altitude, so get the altimeter

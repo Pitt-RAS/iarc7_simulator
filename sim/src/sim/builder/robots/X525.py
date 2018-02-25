@@ -58,50 +58,50 @@ class X525(Robot):
                                    topic='/sim/quad/thrust_controller')
             self.append(self.thrust)
 
-            self.frontThrust = Thrust
-            self.thrust.properties(NumberOfProps = 1,
+            self.frontThrust = PlanarThrust()
+            self.frontThrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
                                    PropAngle = 0
                                    )
-            self.thrust.add_stream('ros',
+            self.frontThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
                                    topic='/sim/quad/front_thrust_controller')
             self.append(self.frontThrust)
 
-            self.backThrust = PlanarThrust
-            self.thrust.properties(NumberOfProps = 1,
+            self.backThrust = PlanarThrust()
+            self.backThrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
                                    PropAngle = math.pi
                                    )
-            self.thrust.add_stream('ros',
+            self.backThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
                                    topic='/sim/quad/back_thrust_controller')
             self.append(self.backThrust)
 
-            self.leftThrust = PlanarThrust
-            self.thrust.properties(NumberOfProps = 1,
+            self.leftThrust = PlanarThrust()
+            self.leftThrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
                                    PropAngle = math.pi/2
                                    )
-            self.thrust.add_stream('ros',
+            self.leftThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
                                    topic='/sim/quad/left_thrust_controller')
             self.append(self.leftThrust)
 
-            self.rightThrust = PlanarThrust
-            self.thrust.properties(NumberOfProps = 1,
+            self.rightThrust = PlanarThrust()
+            self.rightThrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
                                    PropAngle = -math.pi/2
                                    )
-            self.thrust.add_stream('ros',
+            self.rightThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
                                    topic='/sim/quad/right_thrust_controller')
             self.append(self.rightThrust)
@@ -159,9 +159,9 @@ class X525(Robot):
                           ((1, 0), 'right'),
                           ((-1, 0), 'left')):
             next_switch = ContactSwitch()
-            next_switch.translate(Quadcopter.QUAD_FOOT_SQUARE_TRANSLATION * translate[0][1],
-                                  -Quadcopter.QUAD_FOOT_SQUARE_TRANSLATION * translate[0][0],
-                                  -Quadcopter.QUAD_CENTER_HEIGHT)
+            next_switch.translate(X525.QUAD_FOOT_SQUARE_TRANSLATION * translate[0][1],
+                                  -X525.QUAD_FOOT_SQUARE_TRANSLATION * translate[0][0],
+                                  -X525.QUAD_CENTER_HEIGHT)
             next_switch.rotate(0, math.pi/2, 0)
             next_switch.add_stream(
                     'ros',
