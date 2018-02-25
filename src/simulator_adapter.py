@@ -15,7 +15,8 @@ from iarc7_msgs.msg import (BoolStamped,
                             OdometryArray,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped,
-                            PlanarThrottleStamped)
+                            PlanarThrottleStamped,
+                            Orientation6DOFStamped)
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
@@ -110,7 +111,7 @@ def sim_left_switch_callback(msg):
 def sim_right_switch_callback(msg):
     switches.right = msg.data
 
-def control_direction_callback(direction_msg,planar_direction_msg):
+def control_direction_callback(direction_msg):
     attitude_msg = Float32MultiArray()
     attitude_msg.layout.dim.append(MultiArrayDimension())
     attitude_msg.layout.dim[0].label = ''
@@ -119,17 +120,17 @@ def control_direction_callback(direction_msg,planar_direction_msg):
     attitude_msg.layout.data_offset = 0
 
     if fc_status.armed:
-        thrust_percentage = direction_msg.throttle
-        planar_thrust =[planar_direction_msg.front_throttle,
-                        planar_direction_msg.back_throttle,
-                        planar_direction_msg.left_throttle,
-                        planar_direction_msg.right_throttle
+        thrust_percentage = direction_msg.planarThrottle.orientationThrottle.throttle
+        planar_thrust =[direction_msg.planarThrottle.front_throttle,
+                        direction_msg.planarThrottle.back_throttle,
+                        direction_msg.planarThrottle.left_throttle,
+                        direction_msg.planarThrottle.right_throttle
                 ]
 
         attitude_msg.data = [
-                -direction_msg.data.roll,
-                direction_msg.data.pitch,
-                direction_msg.data.yaw,
+                -direction_msg.orientationThrottle.data.roll,
+                direction_msg.orientationThrottle.data.pitch,
+                direction_msg.orientationThrottle.data.yaw,
                 0.01
             ]
     else:
@@ -329,8 +330,7 @@ if __name__ == '__main__':
 
     # Subscribers
     rospy.Subscriber('uav_direction_command',
-                     OrientationThrottleStamped,
-                     PlanarThrottleStamped,
+                     Orientation6DOFStamped,
                      control_direction_callback)
     if not publish_ground_truth_altitude:
         # We aren't publishing the ground truth altitude, so get the altimeter
