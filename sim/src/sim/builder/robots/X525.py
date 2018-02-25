@@ -1,5 +1,6 @@
 from morse.builder import *
 from sim.builder.actuators.thrust import Thrust
+from sim.builder.actuators.planarThrust import PlanarThrust
 from sim.builder.sensors.LidarLite import LidarLite
 from sim.builder.sensors.ContactSwitch import ContactSwitch
 
@@ -23,7 +24,7 @@ class X525(Robot):
                  create_teleport_actuator=False):
 
         # Quadcopter.blend is located in the data/robots directory
-        Robot.__init__(self, 'sim/robots/Quadcopter_Fast.blend', name)
+        Robot.__init__(self, 'sim/robots/Quadcopter_fast.blend', name)
         # Robot.__init__(self, 'sim/robots/Quadcopter.blend', name)
         self.properties(classpath = "sim.robots.X525.X525")
 
@@ -47,7 +48,7 @@ class X525(Robot):
             self.motion.add_stream('ros', topic='/sim/quad/attitude_controller')
             self.append(self.motion)
 
-            self.thrust = Thrust()
+            self.thrust = PlanarThrust()
             self.thrust.properties(NumberOfProps = 4,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
@@ -69,7 +70,7 @@ class X525(Robot):
                                    topic='/sim/quad/front_thrust_controller')
             self.append(self.frontThrust)
 
-            self.backThrust = Thrust
+            self.backThrust = PlanarThrust
             self.thrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
@@ -81,7 +82,7 @@ class X525(Robot):
                                    topic='/sim/quad/back_thrust_controller')
             self.append(self.backThrust)
 
-            self.leftThrust = Thrust
+            self.leftThrust = PlanarThrust
             self.thrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
@@ -93,7 +94,7 @@ class X525(Robot):
                                    topic='/sim/quad/left_thrust_controller')
             self.append(self.leftThrust)
 
-            self.rightThrust = Thrust
+            self.rightThrust = PlanarThrust
             self.thrust.properties(NumberOfProps = 1,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
