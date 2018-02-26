@@ -48,7 +48,7 @@ class X525(Robot):
             self.motion.add_stream('ros', topic='/sim/quad/attitude_controller')
             self.append(self.motion)
 
-            self.thrust = PlanarThrust()
+            self.thrust = Thrust()
             self.thrust.properties(NumberOfProps = 4,
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,

@@ -15,8 +15,7 @@ from iarc7_msgs.msg import (BoolStamped,
                             OdometryArray,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped,
-                            PlanarThrottleStamped,
-                            Orientation6DOFStamped)
+                            PlanarThrottleStamped)
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
@@ -120,17 +119,17 @@ def control_direction_callback(direction_msg):
     attitude_msg.layout.data_offset = 0
 
     if fc_status.armed:
-        thrust_percentage = direction_msg.planarThrottle.orientationThrottle.throttle
-        planar_thrust =[direction_msg.planarThrottle.front_throttle,
-                        direction_msg.planarThrottle.back_throttle,
-                        direction_msg.planarThrottle.left_throttle,
-                        direction_msg.planarThrottle.right_throttle
+        thrust_percentage = direction_msg.throttle
+        planar_thrust =[direction_msg.planar.front_throttle,
+                        direction_msg.planar.back_throttle,
+                        direction_msg.planar.left_throttle,
+                        direction_msg.planar.right_throttle
                 ]
 
         attitude_msg.data = [
-                -direction_msg.orientationThrottle.data.roll,
-                direction_msg.orientationThrottle.data.pitch,
-                direction_msg.orientationThrottle.data.yaw,
+                -direction_msg.data.roll,
+                direction_msg.data.pitch,
+                direction_msg.data.yaw,
                 0.01
             ]
     else:
@@ -330,7 +329,7 @@ if __name__ == '__main__':
 
     # Subscribers
     rospy.Subscriber('uav_direction_command',
-                     Orientation6DOFStamped,
+                     OrientationThrottleStamped,
                      control_direction_callback)
     if not publish_ground_truth_altitude:
         # We aren't publishing the ground truth altitude, so get the altimeter

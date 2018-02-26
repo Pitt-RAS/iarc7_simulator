@@ -21,27 +21,27 @@ prototype_uav = rospy.get_param('sim/prototype_uav', True)
 roomba_placement_radius = 1
 num_targets = 10
 
+for i in range(num_targets):
+    angle = 2*math.pi / num_targets * i
+    robot = TargetRoomba('roomba%i'%i)
+    robot.translate(roomba_placement_radius * math.cos(angle),
+            roomba_placement_radius * math.sin(angle),
+            0)
+    robot.rotate(0, 0, angle)
+
+# Place obstacles
+obstacle_placement_radius = 5
+num_obstacles = 4
+for i in range(num_obstacles):
+    angle = 2*math.pi / num_obstacles * i
+    robot = Obstacle('obstacle%i'%i)
+    robot.translate(obstacle_placement_radius * -math.sin(angle),
+            obstacle_placement_radius * math.cos(angle),
+            0)
+    robot.rotate(0, 0, angle)
+
+# Place drone
 if not prototype_uav:
-    for i in range(num_targets):
-        angle = 2*math.pi / num_targets * i
-        robot = TargetRoomba('roomba%i'%i)
-        robot.translate(roomba_placement_radius * math.cos(angle),
-                roomba_placement_radius * math.sin(angle),
-                0)
-        robot.rotate(0, 0, angle)
-
-    # Place obstacles
-    obstacle_placement_radius = 5
-    num_obstacles = 4
-    for i in range(num_obstacles):
-        angle = 2*math.pi / num_obstacles * i
-        robot = Obstacle('obstacle%i'%i)
-        robot.translate(obstacle_placement_radius * -math.sin(angle),
-                obstacle_placement_radius * math.cos(angle),
-                0)
-        robot.rotate(0, 0, angle)
-
-    # Place drone
     robot = Quadcopter('Quadcopter',
                     front_camera_resolution=front_camera_resolution,
                     left_camera_resolution=left_camera_resolution,
@@ -84,9 +84,8 @@ mat = bpy.data.materials.get(floor_material_name)
 bpy.data.objects['Plane'].data.materials[0] = mat
 
 # Alternate roomba colors
-if not prototype_uav:
-    green_mat = bpy.data.materials.get("Gloss Banner Green")
-    red_mat = bpy.data.materials.get("Gloss Banner Red")
-    mats = [green_mat, red_mat]
-    for i in range(num_targets):
-        bpy.data.objects["roomba%d"%i].data.materials[1] = mats[i%2]
+green_mat = bpy.data.materials.get("Gloss Banner Green")
+red_mat = bpy.data.materials.get("Gloss Banner Red")
+mats = [green_mat, red_mat]
+for i in range(num_targets):
+    bpy.data.objects["roomba%d"%i].data.materials[1] = mats[i%2]
