@@ -13,7 +13,7 @@
     </group>
 
     <group if="$(eval str(arg('sim_type')) == 'senior_design')" >
-        <include file="$(find iarc7_simulator)/launch/static_transforms_sim.launch" />
+        <include file="$(find iarc7_simulator)/launch/static_transforms_prototype_sim.launch" />
 
         <node name="$(anon morse_launcher)" pkg="iarc7_simulator"
         type="morse_launcher.sh" cwd="node" />

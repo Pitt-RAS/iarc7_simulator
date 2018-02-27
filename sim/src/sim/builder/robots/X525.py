@@ -8,8 +8,8 @@ import math
 
 class X525(Robot):
 
-    QUAD_CENTER_HEIGHT = 0.2
-    QUAD_FOOT_SQUARE_TRANSLATION = 0.55
+    QUAD_CENTER_HEIGHT = 0.035
+    QUAD_FOOT_SQUARE_TRANSLATION = 0.157
 
     """
     A template robot model for Quadcopter, with a motion controller and a pose

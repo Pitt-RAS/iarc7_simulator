@@ -59,7 +59,7 @@ elif prototype_uav:
                     back_camera_resolution=back_camera_resolution,
                     bottom_camera_resolution=bottom_camera_resolution,
                     create_teleport_actuator=create_teleport_actuator)
-    robot.translate(0, 0, 0.2)
+    robot.translate(0, 0, 0.035)
 
 # Add /clock publisher
 fake_robot = FakeRobot()
