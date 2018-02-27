@@ -272,8 +272,8 @@ if __name__ == '__main__':
     bottom_camera_on = bool(rospy.get_param(
             '/sim/bottom_camera_resolution', False))
 
-    publish_prototype_uav = rospy.get_param(
-            '/sim/prototype_uav', False)
+    publish_prototype_uav = bool(rospy.get_param(
+            '/sim/prototype_uav', False))
 
     # MORSE SIDE COMMUNICATION
 
@@ -295,22 +295,21 @@ if __name__ == '__main__':
                                       queue_size=0)
 
 
-    if publish_prototype_uav:
-        quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
-                Float64,
-                queue_size=0)
+    quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
+            Float64,
+            queue_size=0)
 
-        quad_back_thrust_pub = rospy.Publisher('/sim/quad/back_thrust_controller',
-                Float64,
-                queue_size=0)
+    quad_back_thrust_pub = rospy.Publisher('/sim/quad/back_thrust_controller',
+            Float64,
+            queue_size=0)
 
-        quad_left_thrust_pub = rospy.Publisher('/sim/quad/left_thrust_controller',
-                Float64,
-                queue_size=0)
+    quad_left_thrust_pub = rospy.Publisher('/sim/quad/left_thrust_controller',
+            Float64,
+            queue_size=0)
 
-        quad_right_thrust_pub = rospy.Publisher('/sim/quad/right_thrust_controller',
-                Float64,
-                queue_size=0)
+    quad_right_thrust_pub = rospy.Publisher('/sim/quad/right_thrust_controller',
+            Float64,
+            queue_size=0)
 
     if publish_ground_truth_roombas:
         for i in range(num_roombas):
