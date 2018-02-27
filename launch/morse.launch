@@ -1,9 +1,9 @@
 <launch>
     <param name="/use_sim_time" value="true" />
     <arg name="platform" default="sim" doc="string representing the platform" />
-    <rosparam command="load" file="$(find iarc7_simulator)/param/morse.yaml" />
 
     <group if="$(eval str(arg('platform')) == 'sim')" >
+        <rosparam command="load" file="$(find iarc7_simulator)/param/morse.yaml" />
         <include file="$(find iarc7_simulator)/launch/static_transforms_sim.launch" />
 
         <node name="$(anon morse_launcher)" pkg="iarc7_simulator"
@@ -13,6 +13,7 @@
     </group>
 
     <group if="$(eval str(arg('platform')) == 'sim_1.5')" >
+        <rosparam command="load" file="$(find iarc7_simulator)/param/morse-prototype.yaml" />
         <include file="$(find iarc7_simulator)/launch/static_transforms_prototype_sim.launch" />
 
         <node name="$(anon morse_launcher)" pkg="iarc7_simulator"
