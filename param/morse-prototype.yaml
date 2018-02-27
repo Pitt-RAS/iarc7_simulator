@@ -12,7 +12,7 @@ sim:
     max_roomba_output_freq: 61
     max_obstacle_output_freq: 61
 
-    num_roombas: 1
+    num_roombas: 0
     num_obstacles: 0
 
     # Choose one of:
