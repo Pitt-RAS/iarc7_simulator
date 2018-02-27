@@ -12,7 +12,7 @@
         <node name="simulator_adapter" pkg="iarc7_simulator" type="simulator_adapter.py" />
     </group>
 
-    <group if="$(eval str(arg('sim_type')) == 'sim_1.5')" >
+    <group if="$(eval str(arg('platform')) == 'sim_1.5')" >
         <include file="$(find iarc7_simulator)/launch/static_transforms_prototype_sim.launch" />
 
         <node name="$(anon morse_launcher)" pkg="iarc7_simulator"
