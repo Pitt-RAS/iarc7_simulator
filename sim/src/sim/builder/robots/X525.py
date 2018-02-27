@@ -9,7 +9,7 @@ import math
 class X525(Robot):
 
     QUAD_CENTER_HEIGHT = 0.035
-    QUAD_FOOT_SQUARE_TRANSLATION = 0.157
+    QUAD_FOOT_SQUARE_TRANSLATION = 0.3
 
     """
     A template robot model for Quadcopter, with a motion controller and a pose
@@ -128,7 +128,7 @@ class X525(Robot):
 
         self.lidar = LidarLite()
         self.lidar.properties(min_range=0.0, max_range=100.0)
-        self.lidar.translate(z=-0.1)
+        self.lidar.translate(z=-0.032,x=-0.115)
         self.lidar.rotate(y=math.pi/2)
         self.lidar.add_stream('ros',
                               'sim.middleware.ros.lidarlite.LidarLitePublisher',
@@ -138,7 +138,7 @@ class X525(Robot):
 
         self.sharpir = LidarLite()
         self.sharpir.properties(min_range=0.0, max_range=0.8)
-        self.sharpir.translate(z=-0.01, x=0.1)
+        self.sharpir.translate(z=-0.035, x=0.08, y=-0.032)
         self.sharpir.rotate(y=math.pi/2)
         self.sharpir.add_stream('ros',
                                 'sim.middleware.ros.lidarlite.LidarLitePublisher',
