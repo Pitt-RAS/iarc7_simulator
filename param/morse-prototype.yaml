@@ -12,8 +12,8 @@ sim:
     max_roomba_output_freq: 61
     max_obstacle_output_freq: 61
 
-    num_roombas: 10
-    num_obstacles: 4
+    num_roombas: 1
+    num_obstacles: 0
 
     # Choose one of:
     #   MatteFloor
@@ -34,4 +34,5 @@ sim:
 
     create_teleport_actuator: false
 
-    prototype_uav: false
+    # If this is a regular Quadrotor (not from senior design) make this false
+    prototype_uav: true
