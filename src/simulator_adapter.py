@@ -239,6 +239,14 @@ def roomba_odom_callback(msg, topic, data={}):
                         0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0)
 
+                roomba_odom.twist.twist.linear.x = 0
+                roomba_odom.twist.twist.linear.y = 0
+                roomba_odom.twist.twist.linear.z = 0
+
+                roomba_odom.twist.twist.angular.x = 0
+                roomba_odom.twist.twist.angular.y = 0
+                roomba_odom.twist.twist.angular.z = 0
+
                 observations.append(roomba_odom)
         out_msg.data = observations
         roomba_noisy_pub.publish(out_msg)
