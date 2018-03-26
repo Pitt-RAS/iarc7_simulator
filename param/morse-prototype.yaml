@@ -6,6 +6,18 @@ sim:
     ground_truth_roombas: true
     ground_truth_obstacles: false
 
+    noisy_roombas:
+        # Publish noisy roomba observations (as if from cameras) on
+        # /roomba_observations?
+        publish: false
+
+        # observation std dev is (drone to roomba dist)*uncertainty_scale
+        uncertainty_scale: 0.1
+
+        # Characteristic distance of observation probability dropoff
+        # Probability of observation is 1 / (1 + d/d0)
+        d0: 2.5
+
     # Because MORSE spits out messages all at the same time, if you want these
     # to come out at MORSE's update frequency (60Hz by default), you have to
     # make this a little larger than MORSE's frequency
