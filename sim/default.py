@@ -15,12 +15,9 @@ back_camera_resolution = rospy.get_param('sim/back_camera_resolution', None)
 bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
 create_teleport_actuator = rospy.get_param('sim/create_teleport_actuator', False)
 prototype_uav = rospy.get_param('sim/prototype_uav', True)
-num_roombas = rospy.get_param('sim/num_roombas',True)
-num_obstacle_roombas = rospy.get_param('sim/num_obstacles',True)
 
-
-num_targets = num_roombas
-num_obstacles = num_obstacle_roombas
+num_targets = rospy.get_param('sim/num_roombas')
+num_obstacles = rospy.get_param('sim/num_obstacles')
 # Place roombas
 roomba_placement_radius = 1
 for i in range(num_targets):
