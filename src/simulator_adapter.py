@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import math
+import numpy as np
 import re
 import rospy
 import tf.transformations
@@ -59,6 +60,9 @@ def sim_pose_callback(pose_msg):
     orientation_msg.data.yaw = (2*math.pi - yaw) % (2*math.pi)
 
     orientation_pub.publish(orientation_msg)
+
+    global last_drone_position
+    last_drone_position = pose_msg.pose.position
 
     if publish_ground_truth_orientation:
         transform_msg = TransformStamped()
@@ -211,7 +215,53 @@ def roomba_odom_callback(msg, topic, data={}):
     data['last_time'] = rospy.Time.now()
     out_msg = OdometryArray()
     out_msg.data = data['cur_odoms'].values()
-    roomba_pub.publish(out_msg)
+
+    if publish_ground_truth_roombas:
+        roomba_pub.publish(out_msg)
+
+    if publish_noisy_roombas and last_drone_position is not None:
+        observations = []
+        for roomba_odom in data['cur_odoms'].values():
+            roomba_pos = np.array((roomba_odom.pose.pose.position.x,
+                                   roomba_odom.pose.pose.position.y,
+                                   roomba_odom.pose.pose.position.z))
+            drone_pos = np.array((last_drone_position.x,
+                                  last_drone_position.y,
+                                  last_drone_position.z))
+            dist = np.linalg.norm(roomba_pos - drone_pos)
+
+            p = 1 / (1 + dist / noisy_roombas_d0)
+            observed = np.random.random() <= p
+            if observed:
+                observed_pos = np.random.normal(
+                        roomba_pos[:-1],
+                        (dist * noisy_roombas_uncertainty_scale,
+                         dist * noisy_roombas_uncertainty_scale))
+
+                roomba_odom.pose.pose.position.x = observed_pos[0]
+                roomba_odom.pose.pose.position.y = observed_pos[1]
+                roomba_odom.pose.pose.position.z = 0.0
+
+                c = dist * noisy_roombas_uncertainty_scale
+                roomba_odom.pose.covariance = (
+                        c, 0, 0, 0, 0, 0,
+                        0, c, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0)
+
+                roomba_odom.twist.twist.linear.x = 0
+                roomba_odom.twist.twist.linear.y = 0
+                roomba_odom.twist.twist.linear.z = 0
+
+                roomba_odom.twist.twist.angular.x = 0
+                roomba_odom.twist.twist.angular.y = 0
+                roomba_odom.twist.twist.angular.z = 0
+
+                observations.append(roomba_odom)
+        out_msg.data = observations
+        roomba_noisy_pub.publish(out_msg)
 
 def obstacle_odom_callback(msg, topic, data={}):
     if not 'cur_odoms' in data:
@@ -252,8 +302,14 @@ if __name__ == '__main__':
             '/sim/ground_truth_camera_localization', False)
     publish_ground_truth_roombas = rospy.get_param(
             '/sim/ground_truth_roombas', False)
+    publish_noisy_roombas = rospy.get_param(
+            '/sim/noisy_roombas/publish', False)
+    noisy_roombas_uncertainty_scale = rospy.get_param(
+            '/sim/noisy_roombas/uncertainty_scale', 0.0)
+    noisy_roombas_d0 = rospy.get_param(
+            '/sim/noisy_roombas/d0', 0.0)
     publish_ground_truth_obstacles = rospy.get_param(
-            '/sim/ground_truth_obstacles', False)
+            '/sim/noisy_roombas', False)
     max_roomba_output_freq = rospy.get_param(
             '/sim/max_roomba_output_freq', float('Inf'))
     max_obstacle_output_freq = rospy.get_param(
@@ -278,7 +334,9 @@ if __name__ == '__main__':
     # MORSE SIDE COMMUNICATION
 
     # Subscribers
+    last_drone_position = None
     rospy.Subscriber('/sim/quad/pose', PoseStamped, sim_pose_callback)
+
     if publish_ground_truth_localization:
         rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
     rospy.Subscriber('/sim/switch_front', BoolStamped, sim_front_switch_callback)
@@ -293,6 +351,7 @@ if __name__ == '__main__':
     quad_thrust_pub = rospy.Publisher('/sim/quad/thrust_controller',
                                       Float64,
                                       queue_size=0)
+
 
 
     quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
@@ -311,7 +370,8 @@ if __name__ == '__main__':
             Float64,
             queue_size=0)
 
-    if publish_ground_truth_roombas:
+
+    if publish_ground_truth_roombas or publish_noisy_roombas:
         for i in range(num_roombas):
             rospy.Subscriber('/sim/roomba{}/odom'.format(i),
                              Odometry,
@@ -365,6 +425,10 @@ if __name__ == '__main__':
         roomba_pub = rospy.Publisher('roombas',
                                      OdometryArray,
                                      queue_size=0)
+    if publish_noisy_roombas:
+        roomba_noisy_pub = rospy.Publisher('roomba_observations',
+                                           OdometryArray,
+                                           queue_size=0)
     if publish_ground_truth_obstacles:
         obstacle_pub = rospy.Publisher('obstacles',
                                        ObstacleArray,

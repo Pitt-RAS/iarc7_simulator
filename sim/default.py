@@ -18,11 +18,11 @@ prototype_uav = rospy.get_param('sim/prototype_uav', True)
 num_roombas = rospy.get_param('sim/num_roombas',True)
 num_obstacle_roombas = rospy.get_param('sim/num_obstacles',True)
 
-#Don't populate arena if this is the prototype
+
+num_targets = num_roombas
+num_obstacles = num_obstacle_roombas
 # Place roombas
 roomba_placement_radius = 1
-num_targets = num_roombas
-
 for i in range(num_targets):
     angle = 2*math.pi / num_targets * i
     robot = TargetRoomba('roomba%i'%i)
@@ -33,7 +33,6 @@ for i in range(num_targets):
 
 # Place obstacles
 obstacle_placement_radius = 5
-num_obstacles = num_obstacle_roombas
 for i in range(num_obstacles):
     angle = 2*math.pi / num_obstacles * i
     robot = Obstacle('obstacle%i'%i)

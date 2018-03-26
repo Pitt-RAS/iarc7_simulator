@@ -16,7 +16,7 @@ class TargetRoomba(Roomba):
         ###################################
 
         self.top_sensor = TopTouchSensor('TopTouchSensor')
-        self.top_sensor.translate(0, 0, Roomba.ROOMBA_HEIGHT + 0.01)
+        self.top_sensor.translate(0, 0, Roomba.ROOMBA_HEIGHT + 0.07)
         self.top_sensor.add_stream(
                 'ros',
                 'sim.middleware.ros.bump_sensor.BumpSensorPublisher',
