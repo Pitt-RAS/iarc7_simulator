@@ -328,9 +328,6 @@ if __name__ == '__main__':
     bottom_camera_on = bool(rospy.get_param(
             '/sim/bottom_camera_resolution', False))
 
-    publish_prototype_uav = bool(rospy.get_param(
-            '/sim/prototype_uav', False))
-
     # MORSE SIDE COMMUNICATION
 
     # Subscribers
