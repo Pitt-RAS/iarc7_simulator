@@ -15,7 +15,8 @@ from iarc7_msgs.msg import (BoolStamped,
                             ObstacleArray,
                             OdometryArray,
                             OrientationAnglesStamped,
-                            OrientationThrottleStamped)
+                            OrientationThrottleStamped,
+                            PlanarThrottleStamped)
 from geometry_msgs.msg import (PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
@@ -123,6 +124,11 @@ def control_direction_callback(direction_msg):
 
     if fc_status.armed:
         thrust_percentage = direction_msg.throttle
+        planar_thrust =[direction_msg.planar.front_throttle,
+                        direction_msg.planar.back_throttle,
+                        direction_msg.planar.left_throttle,
+                        direction_msg.planar.right_throttle
+                ]
 
         attitude_msg.data = [
                 -direction_msg.data.roll,
@@ -133,9 +139,15 @@ def control_direction_callback(direction_msg):
     else:
         thrust_percentage = 0.0
         attitude_msg.data = [0.0, 0.0, 0.0, 0.0]
+        planar_thrust = [0.0, 0.0, 0.0, 0.0]
 
     quad_thrust_pub.publish(thrust_percentage)
     quad_attitude_pub.publish(attitude_msg)
+
+    quad_front_thrust_pub.publish(planar_thrust[0])
+    quad_back_thrust_pub.publish(planar_thrust[1])
+    quad_left_thrust_pub.publish(planar_thrust[2])
+    quad_right_thrust_pub.publish(planar_thrust[3])
 
 def altimeter_callback(altitude_msg):
     _altimeter_callback(altitude_msg, 0.0009, altimeter_pose_pub)
@@ -336,6 +348,26 @@ if __name__ == '__main__':
     quad_thrust_pub = rospy.Publisher('/sim/quad/thrust_controller',
                                       Float64,
                                       queue_size=0)
+
+
+
+    quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
+            Float64,
+            queue_size=0)
+
+    quad_back_thrust_pub = rospy.Publisher('/sim/quad/back_thrust_controller',
+            Float64,
+            queue_size=0)
+
+    quad_left_thrust_pub = rospy.Publisher('/sim/quad/left_thrust_controller',
+            Float64,
+            queue_size=0)
+
+    quad_right_thrust_pub = rospy.Publisher('/sim/quad/right_thrust_controller',
+            Float64,
+            queue_size=0)
+
+
     if publish_ground_truth_roombas or publish_noisy_roombas:
         for i in range(num_roombas):
             rospy.Subscriber('/sim/roomba{}/odom'.format(i),
