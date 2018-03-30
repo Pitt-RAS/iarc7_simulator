@@ -7,7 +7,7 @@ import math
 
 class Quadcopter(Robot):
 
-    QUAD_CENTER_HEIGHT = 0.2
+    QUAD_CENTER_HEIGHT = 0.2311
     QUAD_FOOT_SQUARE_TRANSLATION = 0.55
 
     """
