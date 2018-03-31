@@ -7,8 +7,11 @@ sim:
     ground_truth_obstacles: false
 
     noisy_roombas:
+        # Note:  this doesn't project the actual camera visible area onto the
+        # ground, it just marks the entire arena as visible.
+
         # Publish noisy roomba observations (as if from cameras) on
-        # /roomba_observations?
+        # /detected_roombas?
         publish: false
 
         # observation std dev is (drone to roomba dist)*uncertainty_scale
