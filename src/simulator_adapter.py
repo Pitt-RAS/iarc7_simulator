@@ -16,8 +16,11 @@ from iarc7_msgs.msg import (BoolStamped,
                             OdometryArray,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped,
-                            PlanarThrottleStamped)
-from geometry_msgs.msg import (PointStamped,
+                            PlanarThrottleStamped,
+                            RoombaDetection,
+                            RoombaDetectionFrame)
+from geometry_msgs.msg import (Point32,
+                               PointStamped,
                                PoseStamped,
                                PoseWithCovarianceStamped,
                                Quaternion,
@@ -222,6 +225,8 @@ def roomba_odom_callback(msg, topic, data={}):
     if publish_noisy_roombas and last_drone_position is not None:
         observations = []
         for roomba_odom in data['cur_odoms'].values():
+            roomba_msg = RoombaDetection()
+
             roomba_pos = np.array((roomba_odom.pose.pose.position.x,
                                    roomba_odom.pose.pose.position.y,
                                    roomba_odom.pose.pose.position.z))
@@ -238,29 +243,31 @@ def roomba_odom_callback(msg, topic, data={}):
                         (dist * noisy_roombas_uncertainty_scale,
                          dist * noisy_roombas_uncertainty_scale))
 
-                roomba_odom.pose.pose.position.x = observed_pos[0]
-                roomba_odom.pose.pose.position.y = observed_pos[1]
-                roomba_odom.pose.pose.position.z = 0.0
+                roomba_msg.pose.x = observed_pos[0]
+                roomba_msg.pose.y = observed_pos[1]
+
+                observed_theta = np.random.normal(
+                        np.arctan2(roomba_odom.twist.twist.linear.y,
+                                 roomba_odom.twist.twist.linear.x),
+                        1)
+
+                roomba_msg.pose.theta = observed_theta % (2*np.pi)
 
                 c = dist * noisy_roombas_uncertainty_scale
-                roomba_odom.pose.covariance = (
-                        c, 0, 0, 0, 0, 0,
-                        0, c, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0)
 
-                roomba_odom.twist.twist.linear.x = 0
-                roomba_odom.twist.twist.linear.y = 0
-                roomba_odom.twist.twist.linear.z = 0
+                observations.append(roomba_msg)
 
-                roomba_odom.twist.twist.angular.x = 0
-                roomba_odom.twist.twist.angular.y = 0
-                roomba_odom.twist.twist.angular.z = 0
-
-                observations.append(roomba_odom)
-        out_msg.data = observations
+        out_msg = RoombaDetectionFrame()
+        out_msg.header = msg.header
+        for point in ((-1, 1),
+                      (-1, -1),
+                      (1, -1),
+                      (1, 1)):
+            new_point = Point32()
+            new_point.x = point[0] * 10
+            new_point.y = point[1] * 10
+            out_msg.detection_region.points.append(new_point)
+        out_msg.roombas = observations
         roomba_noisy_pub.publish(out_msg)
 
 def obstacle_odom_callback(msg, topic, data={}):
@@ -423,8 +430,8 @@ if __name__ == '__main__':
                                      OdometryArray,
                                      queue_size=0)
     if publish_noisy_roombas:
-        roomba_noisy_pub = rospy.Publisher('roomba_observations',
-                                           OdometryArray,
+        roomba_noisy_pub = rospy.Publisher('detected_roombas',
+                                           RoombaDetectionFrame,
                                            queue_size=0)
     if publish_ground_truth_obstacles:
         obstacle_pub = rospy.Publisher('obstacles',
