@@ -388,6 +388,36 @@ if __name__ == '__main__':
                              obstacle_odom_callback,
                              ('/sim/obstacle{}/odom'.format(i),))
 
+    if publish_ground_truth_roombas and num_roombas == 0:
+        def callback(_):
+            msg = OdometryArray()
+            roomba_pub.publish(msg)
+        timer1 = rospy.Timer(rospy.Duration(1.0 / max_roomba_output_freq), callback)
+
+    if publish_ground_truth_obstacles and num_obstacles == 0:
+        def callback(_):
+            msg = ObstacleArray()
+            msg.header.stamp = rospy.Time.now()
+            msg.header.frame_id = 'map'
+            obstacle_pub.publish(msg)
+        timer2 = rospy.Timer(rospy.Duration(1.0 / max_obstacle_output_freq), callback)
+
+    if publish_noisy_roombas and num_roombas == 0:
+        def callback(_):
+            msg = RoombaDetectionFrame()
+            msg.header.stamp = rospy.Time.now()
+            msg.header.frame_id = 'map'
+            for point in ((-1, 1),
+                          (-1, -1),
+                          (1, -1),
+                          (1, 1)):
+                new_point = Point32()
+                new_point.x = point[0] * 10
+                new_point.y = point[1] * 10
+                msg.detection_region.points.append(new_point)
+            roomba_noisy_pub.publish(msg)
+        timer3 = rospy.Timer(rospy.Duration(1.0 / max_roomba_output_freq), callback)
+
     # PUBLIC SIDE COMMUNICATION
 
     # Subscribers
