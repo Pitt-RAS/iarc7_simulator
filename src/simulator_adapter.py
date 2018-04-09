@@ -284,8 +284,10 @@ def obstacle_odom_callback(msg, topic, data={}):
     data['last_time'] = rospy.Time.now()
     out_msg = ObstacleArray()
     out_msg.header.stamp = msg.header.stamp
+    out_msg.header.frame_id = "map"
     for odom in data['cur_odoms'].values():
         obst = Obstacle()
+        obst.header.frame_id = msg.header.frame_id
         obst.header.stamp = msg.header.stamp
         obst.odom = odom
         obst.base_radius = 0.17
