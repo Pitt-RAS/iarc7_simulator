@@ -16,7 +16,6 @@ from iarc7_msgs.msg import (BoolStamped,
                             OdometryArray,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped,
-                            PlanarThrottleStamped,
                             RoombaDetection,
                             RoombaDetectionFrame)
 from geometry_msgs.msg import (Point32,
