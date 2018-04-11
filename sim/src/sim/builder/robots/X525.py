@@ -63,7 +63,7 @@ class X525(Robot):
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
-                                   PropAngle = 0
+                                   PropAngle = math.pi
                                    )
             self.frontThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
@@ -75,7 +75,7 @@ class X525(Robot):
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
-                                   PropAngle = math.pi
+                                   PropAngle = 0
                                    )
             self.backThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
@@ -87,7 +87,7 @@ class X525(Robot):
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
-                                   PropAngle = math.pi/2
+                                   PropAngle = -math.pi/2
                                    )
             self.leftThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
@@ -99,7 +99,7 @@ class X525(Robot):
                                    PropDiameter = 0.25,
                                    PropPitch = 0.1,
                                    PropMaxSpeed = 12214 / 60.0,
-                                   PropAngle = -math.pi/2
+                                   PropAngle = math.pi/2
                                    )
             self.rightThrust.add_stream('ros',
                                    'sim.middleware.ros.thrust.ThrustReader',
