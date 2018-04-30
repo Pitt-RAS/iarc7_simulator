@@ -2,7 +2,7 @@ sim:
     ground_truth_orientation: false
     ground_truth_localization: false
     ground_truth_altitude: false
-    ground_truth_camera_localization: false
+    ground_truth_camera_localization: true
     ground_truth_roombas: true
     ground_truth_obstacles: false
 

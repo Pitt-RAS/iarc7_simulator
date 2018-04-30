@@ -17,7 +17,9 @@ from iarc7_msgs.msg import (BoolStamped,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped,
                             RoombaDetection,
-                            RoombaDetectionFrame)
+                            RoombaDetectionFrame, 
+                            RoombaStateStamped,
+                            RoombaStateStampedArray)
 from geometry_msgs.msg import (Point32,
                                PointStamped,
                                PoseStamped,
@@ -215,8 +217,11 @@ def roomba_odom_callback(msg, topic, data={}):
             return
 
     data['last_time'] = rospy.Time.now()
-    out_msg = OdometryArray()
-    out_msg.data = data['cur_odoms'].values()
+
+    out_msg = RoombaStateStampedArray()
+
+    odom_msg = OdometryArray()
+    odom_msg.data = data['cur_odoms'].values()
 
     if publish_ground_truth_roombas:
         roomba_pub.publish(out_msg)
