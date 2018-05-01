@@ -218,13 +218,20 @@ def roomba_odom_callback(msg, topic, data={}):
 
     data['last_time'] = rospy.Time.now()
 
-    out_msg = RoombaStateStampedArray()
-
     odom_msg = OdometryArray()
     odom_msg.data = data['cur_odoms'].values()
 
+    state_msg = RoombaStateStampedArray()
+
+    for odom in odom_msg.data: 
+        roomba_msg = RoombaStateStamped()
+        roomba_msg.data = odom
+        roomba_msg.roomba_id = odom.child_frame_id
+        state_msg.roombas.append(roomba_msg)
+
     if publish_ground_truth_roombas:
-        roomba_pub.publish(out_msg)
+        roomba_pub.publish(odom_msg)
+        roomba_publisher.publish(state_msg)
 
     if publish_noisy_roombas and last_drone_position is not None:
         observations = []
@@ -464,6 +471,9 @@ if __name__ == '__main__':
     if publish_ground_truth_roombas:
         roomba_pub = rospy.Publisher('roombas',
                                      OdometryArray,
+                                     queue_size=0)
+        roomba_publisher = rospy.Publisher('roomba_full_states',
+                                     RoombaStateStampedArray,
                                      queue_size=0)
     if publish_noisy_roombas:
         roomba_noisy_pub = rospy.Publisher('detected_roombas',
