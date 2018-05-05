@@ -409,10 +409,10 @@ if __name__ == '__main__':
                              Odometry,
                              roomba_odom_callback,
                              ('/sim/roomba{}/odom'.format(i),))
-           
+
             rospy.Subscriber('/sim/roomba{}/state'.format(i),
                             BoolStamped,
-                            roomba_state_callback, 
+                            roomba_state_callback,
                             ('/sim/roomba{}/state'.format(i),))
 
     if publish_ground_truth_obstacles:
