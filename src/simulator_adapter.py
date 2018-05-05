@@ -205,6 +205,10 @@ def arm_service_handler(request):
     fc_status.armed = request.data
     return ArmResponse(success=True)
 
+def roomba_state_callback(msg, topic):
+    name = topic[0].split('/')[2]
+    roomba_states[name] = msg
+
 def roomba_odom_callback(msg, topic, data={}):
     if not 'cur_odoms' in data:
         data['cur_odoms'] = {}
@@ -227,6 +231,14 @@ def roomba_odom_callback(msg, topic, data={}):
         roomba_msg = RoombaStateStamped()
         roomba_msg.data = odom
         roomba_msg.roomba_id = odom.child_frame_id
+
+        roomba_id = odom.child_frame_id.split('/')[0]
+
+        if roomba_id in roomba_states:
+            state_data = roomba_states[roomba_id]
+            roomba_msg.turning = state_data.data
+            roomba_msg.moving_forward = not state_data.data
+
         state_msg.roombas.append(roomba_msg)
 
     if publish_ground_truth_roombas:
@@ -387,6 +399,9 @@ if __name__ == '__main__':
             Float64,
             queue_size=0)
 
+    global roomba_states
+    roomba_states = {}
+
 
     if publish_ground_truth_roombas or publish_noisy_roombas:
         for i in range(num_roombas):
@@ -394,6 +409,12 @@ if __name__ == '__main__':
                              Odometry,
                              roomba_odom_callback,
                              ('/sim/roomba{}/odom'.format(i),))
+           
+            rospy.Subscriber('/sim/roomba{}/state'.format(i),
+                            BoolStamped,
+                            roomba_state_callback, 
+                            ('/sim/roomba{}/state'.format(i),))
+
     if publish_ground_truth_obstacles:
         for i in range(num_obstacles):
             rospy.Subscriber('/sim/obstacle{}/odom'.format(i),
