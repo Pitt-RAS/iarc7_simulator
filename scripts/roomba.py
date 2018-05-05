@@ -24,6 +24,8 @@ ANGULAR_VELOCITY = math.pi / REVERSE_DURATION.to_sec()
 
 OBSTACLE_CIRCLE_RADIUS = 5
 
+ROOMBA_BUMPERS = 12
+
 class Obstacle:
     def __init__(self, namespace):
         self._start_signal = False
@@ -39,17 +41,17 @@ class Obstacle:
                                           Twist,
                                           queue_size=10)
 
-        for topic, _ in rospy.get_published_topics(namespace):
-            match = re.match('{}bumper([0-9]+)'.format(namespace), topic)
-            if match:
-                def bumper_callback(msg, n=int(match.group(1))):
-                    self._update_bumper(msg.data, n)
+        for i in range(ROOMBA_BUMPERS):
+            topic = '{}bumper{}'.format(namespace, i)
 
-                rospy.Subscriber(match.group(),
-                                 BoolStamped,
-                                 bumper_callback)
+            def bumper_callback(msg, n=i):
+                self._update_bumper(msg.data, n)
 
-                self._bumper_data.append(False)
+            rospy.Subscriber(topic,
+                             BoolStamped,
+                             bumper_callback)
+
+            self._bumper_data.append(False)
 
     def _publish_speed(self, linear, angular):
         twist = Twist()
@@ -109,15 +111,15 @@ class Roomba:
                          lambda msg: self._update_touch(msg.data))
 
         self.things = []
-        for topic, _ in rospy.get_published_topics(namespace):
-            match = re.match('{}bumper([0-9]+)'.format(namespace), topic)
-            if match:
-                def bumper_callback(msg):
-                    self._update_bumper(msg.data)
+        for i in range(ROOMBA_BUMPERS):
+            topic = '{}bumper{}'.format(namespace, i)
 
-                self.things.append(rospy.Subscriber(match.group(),
-                                 BoolStamped,
-                                 bumper_callback))
+            def bumper_callback(msg):
+                self._update_bumper(msg.data)
+
+            self.things.append(rospy.Subscriber(topic,
+                             BoolStamped,
+                             bumper_callback))
 
     def _publish_speed(self, linear, angular):
         twist = Twist()
@@ -208,8 +210,10 @@ class Roomba:
 
     def _update_bumper(self, sensor_data):
         if sensor_data:
+            if not self._bump_signal: rospy.logwarn('bumped')
             self._bump_signal = True
 
     def _update_touch(self, sensor_data):
         if sensor_data:
+            if not self._top_touched: rospy.logwarn('touched')
             self._top_touched = True

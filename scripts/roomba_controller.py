@@ -23,17 +23,11 @@ def top_touch_service_handler(request):
 if __name__ == '__main__':
     rospy.init_node('roomba_controller')
 
-    roomba_names = set()
-    obstacle_names = set()
+    num_roombas = rospy.get_param('/sim/num_roombas')
+    roomba_names = ['/sim/roomba{}/'.format(i) for i in range(num_roombas)]
 
-    for topic_name, topic_type in rospy.get_published_topics():
-        match = re.match('(/sim/obstacle[0-9]*/).+', topic_name)
-        if match:
-            obstacle_names.add(match.group(1))
-
-        match = re.match('(/sim/roomba[0-9]*/).+', topic_name)
-        if match:
-            roomba_names.add(match.group(1))
+    num_obstacles = rospy.get_param('/sim/num_obstacles')
+    obstacle_names = ['/sim/obstacle{}/'.format(i) for i in range(num_obstacles)]
 
     roomba_bump_publishers = dict()
 
@@ -54,6 +48,9 @@ if __name__ == '__main__':
 
     rospy.Service('/sim/roomba_bumper_tap', SetBoolOn, top_touch_service_handler)
 
+    while not rospy.is_shutdown() and rospy.Time.now() == rospy.Time(0):
+        rospy.Rate(10).sleep()
+
     obstacles = map(Obstacle, obstacle_names)
     roombas = map(Roomba, roomba_names)
 
@@ -63,7 +60,7 @@ if __name__ == '__main__':
         obstacle.send_start_signal()
 
     rate = rospy.Rate(100)
-    while True:
+    while not rospy.is_shutdown():
         rate.sleep()
         for roomba in roombas:
             roomba.update()

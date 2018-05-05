@@ -12,8 +12,8 @@ class Roomba(GroundRobot):
     ROOMBA_HEIGHT = 0.095
 
     # Angle occupied by one sensor in radians
-    BUMP_SENSOR_ANGLE = 0.489957
-    NUM_BUMP_SENSORS = 6
+    BUMP_SENSOR_ANGLE = 0.489957 / 2
+    NUM_BUMP_SENSORS = 12
 
     def __init__(self, filename=None, name=None, debug=False):
         # Roomba.blend is located in the data/robots directory
@@ -54,7 +54,7 @@ class Roomba(GroundRobot):
 
         angle = -float(Roomba.NUM_BUMP_SENSORS - 1) / 2 * Roomba.BUMP_SENSOR_ANGLE
         sensor_radius = Roomba.ROOMBA_RADIUS + 0.01
-        for i in range(6):
+        for i in range(Roomba.NUM_BUMP_SENSORS):
             next_bumper = BumpSensor()
             next_bumper.translate(sensor_radius * math.cos(angle),
                                   sensor_radius * math.sin(angle),
