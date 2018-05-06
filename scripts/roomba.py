@@ -106,7 +106,7 @@ class Roomba:
                                           Twist,
                                           queue_size=10)
 
-        self._state_publisher = rospy.Publisher('{}state'.format(namespace),
+        self._turning_publisher = rospy.Publisher('{}turning'.format(namespace),
                                           BoolStamped,
                                           queue_size=10)
 
@@ -134,7 +134,7 @@ class Roomba:
     def _publish_state(self):
         state = BoolStamped()
         state.data = (self._state == 'wait' or self._state == 'reverse')
-        self._state_publisher.publish(state)
+        self._turning_publisher.publish(state)
 
     def update(self):
         if self._state == 'wait':

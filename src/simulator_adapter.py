@@ -229,7 +229,7 @@ def roomba_odom_callback(msg, topic, data={}):
 
     for odom in odom_msg.data: 
         roomba_msg = RoombaStateStamped()
-        roomba_msg.data = odom
+        roomba_msg.odom = odom
         roomba_msg.roomba_id = odom.child_frame_id
 
         roomba_id = odom.child_frame_id.split('/')[0]
@@ -399,9 +399,7 @@ if __name__ == '__main__':
             Float64,
             queue_size=0)
 
-    global roomba_states
     roomba_states = {}
-
 
     if publish_ground_truth_roombas or publish_noisy_roombas:
         for i in range(num_roombas):
@@ -410,10 +408,10 @@ if __name__ == '__main__':
                              roomba_odom_callback,
                              ('/sim/roomba{}/odom'.format(i),))
 
-            rospy.Subscriber('/sim/roomba{}/state'.format(i),
+            rospy.Subscriber('/sim/roomba{}/turning'.format(i),
                             BoolStamped,
                             roomba_state_callback,
-                            ('/sim/roomba{}/state'.format(i),))
+                            ('/sim/roomba{}/turning'.format(i),))
 
     if publish_ground_truth_obstacles:
         for i in range(num_obstacles):
