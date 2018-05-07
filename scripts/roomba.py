@@ -106,6 +106,10 @@ class Roomba:
                                           Twist,
                                           queue_size=10)
 
+        self._turning_publisher = rospy.Publisher('{}turning'.format(namespace),
+                                          BoolStamped,
+                                          queue_size=10)
+
         self.thingy = rospy.Subscriber('{}top_touch'.format(namespace),
                          BoolStamped,
                          lambda msg: self._update_touch(msg.data))
@@ -126,6 +130,11 @@ class Roomba:
         twist.linear.x = linear
         twist.angular.z = angular
         self._publisher.publish(twist)
+
+    def _publish_state(self):
+        state = BoolStamped()
+        state.data = (self._state == 'wait' or self._state == 'reverse')
+        self._turning_publisher.publish(state)
 
     def update(self):
         if self._state == 'wait':
@@ -201,6 +210,8 @@ class Roomba:
                 self._publish_speed(FORWARD_VEL, self._angular_noise_velocity)
         else:
             assert False
+
+        self._publish_state()
 
     def send_start_signal(self):
         self._start_signal = True

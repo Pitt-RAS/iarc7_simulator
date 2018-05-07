@@ -17,7 +17,9 @@ from iarc7_msgs.msg import (BoolStamped,
                             OrientationAnglesStamped,
                             OrientationThrottleStamped,
                             RoombaDetection,
-                            RoombaDetectionFrame)
+                            RoombaDetectionFrame, 
+                            RoombaStateStamped,
+                            RoombaStateStampedArray)
 from geometry_msgs.msg import (Point32,
                                PointStamped,
                                PoseStamped,
@@ -203,6 +205,10 @@ def arm_service_handler(request):
     fc_status.armed = request.data
     return ArmResponse(success=True)
 
+def roomba_state_callback(msg, topic):
+    name = topic[0].split('/')[2]
+    roomba_states[name] = msg
+
 def roomba_odom_callback(msg, topic, data={}):
     if not 'cur_odoms' in data:
         data['cur_odoms'] = {}
@@ -215,11 +221,29 @@ def roomba_odom_callback(msg, topic, data={}):
             return
 
     data['last_time'] = rospy.Time.now()
-    out_msg = OdometryArray()
-    out_msg.data = data['cur_odoms'].values()
+
+    odom_msg = OdometryArray()
+    odom_msg.data = data['cur_odoms'].values()
+
+    state_msg = RoombaStateStampedArray()
+
+    for odom in odom_msg.data: 
+        roomba_msg = RoombaStateStamped()
+        roomba_msg.odom = odom
+        roomba_msg.roomba_id = odom.child_frame_id
+
+        roomba_id = odom.child_frame_id.split('/')[0]
+
+        if roomba_id in roomba_states:
+            state_data = roomba_states[roomba_id]
+            roomba_msg.turning = state_data.data
+            roomba_msg.moving_forward = not state_data.data
+
+        state_msg.roombas.append(roomba_msg)
 
     if publish_ground_truth_roombas:
-        roomba_pub.publish(out_msg)
+        roomba_pub.publish(odom_msg)
+        roomba_publisher.publish(state_msg)
 
     if publish_noisy_roombas and last_drone_position is not None:
         observations = []
@@ -375,6 +399,7 @@ if __name__ == '__main__':
             Float64,
             queue_size=0)
 
+    roomba_states = {}
 
     if publish_ground_truth_roombas or publish_noisy_roombas:
         for i in range(num_roombas):
@@ -382,6 +407,12 @@ if __name__ == '__main__':
                              Odometry,
                              roomba_odom_callback,
                              ('/sim/roomba{}/odom'.format(i),))
+
+            rospy.Subscriber('/sim/roomba{}/turning'.format(i),
+                            BoolStamped,
+                            roomba_state_callback,
+                            ('/sim/roomba{}/turning'.format(i),))
+
     if publish_ground_truth_obstacles:
         for i in range(num_obstacles):
             rospy.Subscriber('/sim/obstacle{}/odom'.format(i),
@@ -459,6 +490,9 @@ if __name__ == '__main__':
     if publish_ground_truth_roombas:
         roomba_pub = rospy.Publisher('roombas',
                                      OdometryArray,
+                                     queue_size=0)
+        roomba_publisher = rospy.Publisher('roomba_full_states',
+                                     RoombaStateStampedArray,
                                      queue_size=0)
     if publish_noisy_roombas:
         roomba_noisy_pub = rospy.Publisher('detected_roombas',
