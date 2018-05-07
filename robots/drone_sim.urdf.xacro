@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="quivering_sky_damage">
+    <link name="quad" />
+    <link name="center_of_lift" />
+    <link name="lidarlite" />
+    <link name="sharp_ir" />
+    <link name="laser" />
+    <link name="base_footprint" />
+    <link name="foot1" />
+    <link name="foot2" />
+    <link name="foot3" />
+    <link name="foot4" />
+
+    <joint name="quad_to_center_of_lift" type="fixed">
+        <parent link="quad" />
+        <child link="center_of_lift" />
+        <origin xyz="0 0 0" />
+    </joint>
+
+    <joint name="quad_to_lidarlite" type="fixed">
+        <parent link="quad" />
+        <child link="lidarlite" />
+        <origin xyz="0 0 -0.1" rpy="0 ${pi/2} 0" />
+    </joint>
+
+    <joint name="quad_to_sharp_ir" type="fixed">
+        <parent link="quad" />
+        <child link="sharp_ir" />
+        <origin xyz="0.1 0 -0.01" rpy="0 ${pi/2} 0" />
+    </joint>
+
+    <joint name="quad_to_rplidar" type="fixed">
+        <parent link="quad" />
+        <child link="laser" />
+        <origin xyz="0 0 0" />
+    </joint>
+
+    <joint name="quad_to_base_footprint" type="fixed">
+        <parent link="quad" />
+        <child link="base_footprint" />
+        <origin xyz="0 0 -0.2311" />
+    </joint>
+
+    <xacro:property name="foot_dist" value="0.21" />
+    <xacro:macro name="foot" params="name reflect_x reflect_y">
+        <joint name="base_footprint_to_${name}" type="fixed">
+            <parent link="base_footprint" />
+            <child link="${name}" />
+            <origin xyz="${foot_dist*reflect_x} ${foot_dist*reflect_y} 0" />
+        </joint>
+    </xacro:macro>
+
+    <xacro:foot name="foot1" reflect_x="1" reflect_y="1" />
+    <xacro:foot name="foot2" reflect_x="-1" reflect_y="1" />
+    <xacro:foot name="foot3" reflect_x="1" reflect_y="-1" />
+    <xacro:foot name="foot4" reflect_x="-1" reflect_y="-1" />
+</robot>

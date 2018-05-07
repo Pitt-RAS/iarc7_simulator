@@ -1,28 +1,7 @@
 <launch>
-    <node name="center_of_lift_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 0 0 0 0 /quad /center_of_lift" />
-
-    <node name="lidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 -0.1 0 1.5708 0 /quad /lidarlite" />
-
-    <node name="sharpir_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0.1 0 -0.01 0 1.5708 0 /quad /sharp_ir" />
-
-    <node name="rplidar_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 0 0 0 0 /quad /laser" />
-
-    <node name="ground_plane_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 -0.2311 0 0 0 /quad /base_footprint" />
-
-    <node name="foot1_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0.21 0.21 0 0 0 0 /base_footprint /foot1 " />
-
-    <node name="foot2_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="-0.21 0.21 0 0 0 0 /base_footprint /foot2 " />
-
-    <node name="foot3_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="0.21 -0.21 0 0 0 0 /base_footprint /foot3 " />
-
-    <node name="foot4_static_pub" pkg="tf2_ros" type="static_transform_publisher"
-        args="-0.21 -0.21 0 0 0 0 /base_footprint /foot4 " />
+    <param name="robot_description"
+        command="$(find xacro)/xacro --inorder
+                 '$(find iarc7_simulator)/robots/drone_sim.urdf.xacro'" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="static_tf_publisher" />
 </launch>
