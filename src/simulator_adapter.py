@@ -361,45 +361,7 @@ if __name__ == '__main__':
     bottom_camera_on = bool(rospy.get_param(
             '/sim/bottom_camera_resolution', False))
 
-    # MORSE SIDE COMMUNICATION
-
-    # Subscribers
-    last_drone_position = None
-    rospy.Subscriber('/sim/quad/pose', PoseStamped, sim_pose_callback)
-
-    if publish_ground_truth_localization:
-        rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
-    rospy.Subscriber('/sim/switch_front', BoolStamped, sim_front_switch_callback)
-    rospy.Subscriber('/sim/switch_back', BoolStamped, sim_back_switch_callback)
-    rospy.Subscriber('/sim/switch_left', BoolStamped, sim_left_switch_callback)
-    rospy.Subscriber('/sim/switch_right', BoolStamped, sim_right_switch_callback)
-
-    # Publishers
-    quad_attitude_pub = rospy.Publisher('/sim/quad/attitude_controller',
-                                        Float32MultiArray,
-                                        queue_size=0)
-    quad_thrust_pub = rospy.Publisher('/sim/quad/thrust_controller',
-                                      Float64,
-                                      queue_size=0)
-
-
-
-    quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
-            Float64,
-            queue_size=0)
-
-    quad_back_thrust_pub = rospy.Publisher('/sim/quad/back_thrust_controller',
-            Float64,
-            queue_size=0)
-
-    quad_left_thrust_pub = rospy.Publisher('/sim/quad/left_thrust_controller',
-            Float64,
-            queue_size=0)
-
-    quad_right_thrust_pub = rospy.Publisher('/sim/quad/right_thrust_controller',
-            Float64,
-            queue_size=0)
-
+    # Roomba stuff
     roomba_states = {}
 
     if publish_ground_truth_roombas or publish_noisy_roombas:
@@ -450,44 +412,6 @@ if __name__ == '__main__':
                 msg.detection_region.points.append(new_point)
             roomba_noisy_pub.publish(msg)
         timer3 = rospy.Timer(rospy.Duration(1.0 / max_roomba_output_freq), callback)
-
-    # PUBLIC SIDE COMMUNICATION
-
-    # Subscribers
-    rospy.Subscriber('uav_direction_command',
-                     OrientationThrottleStamped,
-                     control_direction_callback)
-    if not publish_ground_truth_altitude:
-        # We aren't publishing the ground truth altitude, so get the altimeter
-        # reading from the topic
-        rospy.Subscriber('altimeter_reading', Range, altimeter_callback)
-        rospy.Subscriber('short_distance_lidar',
-                         Range,
-                         short_range_altimeter_callback)
-
-    # Publishers
-    fc_battery_pub = rospy.Publisher('fc_battery', Float64Stamped, queue_size=0)
-    motor_battery_pub = rospy.Publisher('motor_battery',
-                                                Float64Stamped,
-                                                queue_size=0)
-    status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
-    orientation_pub = rospy.Publisher('fc_orientation',
-                                      OrientationAnglesStamped,
-                                      queue_size=10)
-    if publish_ground_truth_localization:
-        odom_pub = rospy.Publisher('odometry/filtered', Odometry, queue_size=10)
-    if publish_ground_truth_altitude:
-        altimeter_reading_pub = rospy.Publisher('altimeter_reading',
-                                                Range,
-                                                queue_size=0)
-        short_range_altimeter_reading_pub = rospy.Publisher(
-                'short_distance_lidar',
-                Range,
-                queue_size=0)
-    if publish_ground_truth_camera_localization:
-        camera_pose_pub = rospy.Publisher('camera_localized_pose',
-                                          PoseWithCovarianceStamped,
-                                          queue_size=0)
     if publish_ground_truth_roombas:
         roomba_pub = rospy.Publisher('roombas',
                                      OdometryArray,
@@ -503,96 +427,172 @@ if __name__ == '__main__':
         obstacle_pub = rospy.Publisher('obstacles',
                                        ObstacleArray,
                                        queue_size=0)
-    altimeter_pose_pub = rospy.Publisher('altimeter_pose',
-                                         PoseWithCovarianceStamped,
-                                         queue_size=0)
-    short_range_altimeter_pose_pub = rospy.Publisher(
-            'short_distance_lidar_pose',
-            PoseWithCovarianceStamped,
-            queue_size=0)
-    switches_pub = rospy.Publisher('landing_gear_contact_switches',
-                                   LandingGearContactsStamped,
-                                   queue_size=0)
-
-    # CAMERA STUFF
-    if (front_camera_on
-     or left_camera_on
-     or right_camera_on
-     or back_camera_on
-     or bottom_camera_on):
-        import cv_bridge
-        bridge = cv_bridge.CvBridge()
-
-    if front_camera_on:
-        front_camera_pub = rospy.Publisher('/front_camera/rgb/image_raw',
-                                           Image,
-                                           queue_size=10)
-        rospy.Subscriber('/sim/front_camera/image_raw',
-                         Image,
-                         lambda msg: sim_camera_callback(msg,
-                                                         front_camera_pub))
-    if left_camera_on:
-        left_camera_pub = rospy.Publisher('/left_camera/rgb/image_raw',
-                                           Image,
-                                           queue_size=10)
-        rospy.Subscriber('/sim/left_camera/image_raw',
-                         Image,
-                         lambda msg: sim_camera_callback(msg,
-                                                         left_camera_pub))
-    if right_camera_on:
-        right_camera_pub = rospy.Publisher('/right_camera/rgb/image_raw',
-                                           Image,
-                                           queue_size=10)
-        rospy.Subscriber('/sim/right_camera/image_raw',
-                         Image,
-                         lambda msg: sim_camera_callback(msg,
-                                                         right_camera_pub))
-    if back_camera_on:
-        back_camera_pub = rospy.Publisher('/back_camera/rgb/image_raw',
-                                           Image,
-                                           queue_size=10)
-        rospy.Subscriber('/sim/back_camera/image_raw',
-                         Image,
-                         lambda msg: sim_camera_callback(msg,
-                                                         back_camera_pub))
-    if bottom_camera_on:
-        bottom_camera_pub = rospy.Publisher('/bottom_camera/rgb/image_raw',
-                                           Image,
-                                           queue_size=10)
-        rospy.Subscriber('/sim/bottom_camera/image_raw',
-                         Image,
-                         lambda msg: sim_camera_callback(msg,
-                                                         bottom_camera_pub))
-
-    # Services
-    if not no_drone:
-        rospy.Service('uav_arm', Arm, arm_service_handler)
 
     # TF OBJECTS
     tf2_broadcaster = tf2.TransformBroadcaster()
     tf2_buffer = tf2.Buffer()
     tf2_listener = tf2.TransformListener(tf2_buffer)
 
-    # RATE CONTROL
-    frequency = rospy.get_param('frequency', 50)
-    rate = rospy.Rate(frequency)
-
-    # MESSAGES
-    fc_status = FlightControllerStatus()
-    fc_status.armed = False
-    fc_status.auto_pilot = True
-    fc_status.failsafe = False
-
-    switches = LandingGearContactsStamped()
-    switches.front = False
-    switches.back = False
-    switches.left = False
-    switches.right = False
-
-    # MAIN LOOP
     if no_drone:
         rospy.spin()
     else:
+        # MORSE SIDE COMMUNICATION
+
+        # Subscribers
+        last_drone_position = None
+        rospy.Subscriber('/sim/quad/pose', PoseStamped, sim_pose_callback)
+
+        if publish_ground_truth_localization:
+            rospy.Subscriber('/sim/quad/odom', Odometry, sim_odom_callback)
+        rospy.Subscriber('/sim/switch_front', BoolStamped, sim_front_switch_callback)
+        rospy.Subscriber('/sim/switch_back', BoolStamped, sim_back_switch_callback)
+        rospy.Subscriber('/sim/switch_left', BoolStamped, sim_left_switch_callback)
+        rospy.Subscriber('/sim/switch_right', BoolStamped, sim_right_switch_callback)
+
+        # Publishers
+        quad_attitude_pub = rospy.Publisher('/sim/quad/attitude_controller',
+                                            Float32MultiArray,
+                                            queue_size=0)
+        quad_thrust_pub = rospy.Publisher('/sim/quad/thrust_controller',
+                                          Float64,
+                                          queue_size=0)
+
+
+
+        quad_front_thrust_pub = rospy.Publisher('/sim/quad/front_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        quad_back_thrust_pub = rospy.Publisher('/sim/quad/back_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        quad_left_thrust_pub = rospy.Publisher('/sim/quad/left_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        quad_right_thrust_pub = rospy.Publisher('/sim/quad/right_thrust_controller',
+                Float64,
+                queue_size=0)
+
+        # PUBLIC SIDE COMMUNICATION
+
+        # Subscribers
+        rospy.Subscriber('uav_direction_command',
+                         OrientationThrottleStamped,
+                         control_direction_callback)
+        if not publish_ground_truth_altitude:
+            # We aren't publishing the ground truth altitude, so get the altimeter
+            # reading from the topic
+            rospy.Subscriber('altimeter_reading', Range, altimeter_callback)
+            rospy.Subscriber('short_distance_lidar',
+                             Range,
+                             short_range_altimeter_callback)
+
+        # Publishers
+        fc_battery_pub = rospy.Publisher('fc_battery', Float64Stamped, queue_size=0)
+        motor_battery_pub = rospy.Publisher('motor_battery',
+                                                    Float64Stamped,
+                                                    queue_size=0)
+        status_pub = rospy.Publisher('fc_status', FlightControllerStatus, queue_size=0)
+        orientation_pub = rospy.Publisher('fc_orientation',
+                                          OrientationAnglesStamped,
+                                          queue_size=10)
+        if publish_ground_truth_localization:
+            odom_pub = rospy.Publisher('odometry/filtered', Odometry, queue_size=10)
+        if publish_ground_truth_altitude:
+            altimeter_reading_pub = rospy.Publisher('altimeter_reading',
+                                                    Range,
+                                                    queue_size=0)
+            short_range_altimeter_reading_pub = rospy.Publisher(
+                    'short_distance_lidar',
+                    Range,
+                    queue_size=0)
+        if publish_ground_truth_camera_localization:
+            camera_pose_pub = rospy.Publisher('camera_localized_pose',
+                                              PoseWithCovarianceStamped,
+                                              queue_size=0)
+        altimeter_pose_pub = rospy.Publisher('altimeter_pose',
+                                             PoseWithCovarianceStamped,
+                                             queue_size=0)
+        short_range_altimeter_pose_pub = rospy.Publisher(
+                'short_distance_lidar_pose',
+                PoseWithCovarianceStamped,
+                queue_size=0)
+        switches_pub = rospy.Publisher('landing_gear_contact_switches',
+                                       LandingGearContactsStamped,
+                                       queue_size=0)
+
+        # CAMERA STUFF
+        if (front_camera_on
+         or left_camera_on
+         or right_camera_on
+         or back_camera_on
+         or bottom_camera_on):
+            import cv_bridge
+            bridge = cv_bridge.CvBridge()
+
+        if front_camera_on:
+            front_camera_pub = rospy.Publisher('/front_camera/rgb/image_raw',
+                                               Image,
+                                               queue_size=10)
+            rospy.Subscriber('/sim/front_camera/image_raw',
+                             Image,
+                             lambda msg: sim_camera_callback(msg,
+                                                             front_camera_pub))
+        if left_camera_on:
+            left_camera_pub = rospy.Publisher('/left_camera/rgb/image_raw',
+                                               Image,
+                                               queue_size=10)
+            rospy.Subscriber('/sim/left_camera/image_raw',
+                             Image,
+                             lambda msg: sim_camera_callback(msg,
+                                                             left_camera_pub))
+        if right_camera_on:
+            right_camera_pub = rospy.Publisher('/right_camera/rgb/image_raw',
+                                               Image,
+                                               queue_size=10)
+            rospy.Subscriber('/sim/right_camera/image_raw',
+                             Image,
+                             lambda msg: sim_camera_callback(msg,
+                                                             right_camera_pub))
+        if back_camera_on:
+            back_camera_pub = rospy.Publisher('/back_camera/rgb/image_raw',
+                                               Image,
+                                               queue_size=10)
+            rospy.Subscriber('/sim/back_camera/image_raw',
+                             Image,
+                             lambda msg: sim_camera_callback(msg,
+                                                             back_camera_pub))
+        if bottom_camera_on:
+            bottom_camera_pub = rospy.Publisher('/bottom_camera/rgb/image_raw',
+                                               Image,
+                                               queue_size=10)
+            rospy.Subscriber('/sim/bottom_camera/image_raw',
+                             Image,
+                             lambda msg: sim_camera_callback(msg,
+                                                             bottom_camera_pub))
+
+        # Services
+        rospy.Service('uav_arm', Arm, arm_service_handler)
+
+        # RATE CONTROL
+        frequency = rospy.get_param('frequency', 50)
+        rate = rospy.Rate(frequency)
+
+        # MESSAGES
+        fc_status = FlightControllerStatus()
+        fc_status.armed = False
+        fc_status.auto_pilot = True
+        fc_status.failsafe = False
+
+        switches = LandingGearContactsStamped()
+        switches.front = False
+        switches.back = False
+        switches.left = False
+        switches.right = False
+
+        # MAIN LOOP
         while not rospy.is_shutdown():
             battery_msg = Float64Stamped()
             battery_msg.data = 0.0
