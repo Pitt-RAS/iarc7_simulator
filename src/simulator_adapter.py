@@ -348,6 +348,7 @@ if __name__ == '__main__':
             '/sim/max_obstacle_output_freq', float('Inf'))
     num_roombas = rospy.get_param('/sim/num_roombas', 0)
     num_obstacles = rospy.get_param('/sim/num_obstacles', 0)
+    no_drone = rospy.get_param('/sim/no_drone', False)
 
     front_camera_on = bool(rospy.get_param(
             '/sim/front_camera_resolution', False))
@@ -564,7 +565,8 @@ if __name__ == '__main__':
                                                          bottom_camera_pub))
 
     # Services
-    rospy.Service('uav_arm', Arm, arm_service_handler)
+    if not no_drone:
+        rospy.Service('uav_arm', Arm, arm_service_handler)
 
     # TF OBJECTS
     tf2_broadcaster = tf2.TransformBroadcaster()
@@ -588,19 +590,22 @@ if __name__ == '__main__':
     switches.right = False
 
     # MAIN LOOP
-    while not rospy.is_shutdown():
-        battery_msg = Float64Stamped()
-        battery_msg.data = 0.0
-        battery_msg.header.stamp = rospy.Time.now()
-        fc_battery_pub.publish(battery_msg)
+    if no_drone:
+        rospy.spin()
+    else:
+        while not rospy.is_shutdown():
+            battery_msg = Float64Stamped()
+            battery_msg.data = 0.0
+            battery_msg.header.stamp = rospy.Time.now()
+            fc_battery_pub.publish(battery_msg)
 
-        battery_msg.data = 12.6
-        motor_battery_pub.publish(battery_msg)
+            battery_msg.data = 12.6
+            motor_battery_pub.publish(battery_msg)
 
-        fc_status.header.stamp = rospy.get_rostime()
-        status_pub.publish(fc_status)
+            fc_status.header.stamp = rospy.get_rostime()
+            status_pub.publish(fc_status)
 
-        switches.header.stamp = rospy.get_rostime()
-        switches_pub.publish(switches)
+            switches.header.stamp = rospy.get_rostime()
+            switches_pub.publish(switches)
 
-        rate.sleep()
+            rate.sleep()
