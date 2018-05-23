@@ -15,6 +15,7 @@ back_camera_resolution = rospy.get_param('sim/back_camera_resolution', None)
 bottom_camera_resolution = rospy.get_param('sim/bottom_camera_resolution', None)
 create_teleport_actuator = rospy.get_param('sim/create_teleport_actuator', False)
 prototype_uav = rospy.get_param('sim/prototype_uav', True)
+no_drone = rospy.get_param('sim/no_drone', False)
 
 num_targets = rospy.get_param('sim/num_roombas')
 num_obstacles = rospy.get_param('sim/num_obstacles')
@@ -38,26 +39,27 @@ for i in range(num_obstacles):
             0)
     robot.rotate(0, 0, angle)
 
-# Place drone
-if not prototype_uav:
-    robot = Quadcopter('Quadcopter',
-                    front_camera_resolution=front_camera_resolution,
-                    left_camera_resolution=left_camera_resolution,
-                    right_camera_resolution=right_camera_resolution,
-                    back_camera_resolution=back_camera_resolution,
-                    bottom_camera_resolution=bottom_camera_resolution,
-                    create_teleport_actuator=create_teleport_actuator)
-    robot.translate(0, 0, 0.2)
+if not no_drone:
+    # Place drone
+    if not prototype_uav:
+        robot = Quadcopter('Quadcopter',
+                        front_camera_resolution=front_camera_resolution,
+                        left_camera_resolution=left_camera_resolution,
+                        right_camera_resolution=right_camera_resolution,
+                        back_camera_resolution=back_camera_resolution,
+                        bottom_camera_resolution=bottom_camera_resolution,
+                        create_teleport_actuator=create_teleport_actuator)
+        robot.translate(0, 0, 0.2)
 
-elif prototype_uav:
-    robot = X525('X525',
-                    front_camera_resolution=front_camera_resolution,
-                    left_camera_resolution=left_camera_resolution,
-                    right_camera_resolution=right_camera_resolution,
-                    back_camera_resolution=back_camera_resolution,
-                    bottom_camera_resolution=bottom_camera_resolution,
-                    create_teleport_actuator=create_teleport_actuator)
-    robot.translate(0, 0, 0.035)
+    elif prototype_uav:
+        robot = X525('X525',
+                        front_camera_resolution=front_camera_resolution,
+                        left_camera_resolution=left_camera_resolution,
+                        right_camera_resolution=right_camera_resolution,
+                        back_camera_resolution=back_camera_resolution,
+                        bottom_camera_resolution=bottom_camera_resolution,
+                        create_teleport_actuator=create_teleport_actuator)
+        robot.translate(0, 0, 0.035)
 
 # Add /clock publisher
 fake_robot = FakeRobot()

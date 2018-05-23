@@ -1,8 +1,4 @@
 sim:
-    ground_truth_orientation: false
-    ground_truth_localization: false
-    ground_truth_altitude: false
-    ground_truth_camera_localization: false
     ground_truth_roombas: true
     ground_truth_obstacles: false
 
@@ -24,8 +20,8 @@ sim:
     max_roomba_output_freq: 61
     max_obstacle_output_freq: 61
 
-    num_roombas: 1
-    num_obstacles: 0
+    num_roombas: 10
+    num_obstacles: 4
 
     # Choose one of:
     #   MatteFloor
@@ -36,18 +32,5 @@ sim:
     #   RealFloorV2
     floor: RealFloorV2
 
-    # Uncomment to turn cameras on
-    # Aspect ratio must be 4:3 for the image to come out unstretched
-    # front_camera_resolution: [1280, 960, 60]
-    # left_camera_resolution: [1280, 960, 60]
-    # right_camera_resolution: [1280, 960, 60]
-    # back_camera_resolution: [1280, 960, 60]
-    # bottom_camera_resolution: [1280, 960, 60]
-
-    create_teleport_actuator: false
-
-    # If this is a regular Quadrotor (not from senior design) make this false
-    prototype_uav: true
-
     # If this is true, no drone will be created
-    no_drone: false
+    no_drone: true
