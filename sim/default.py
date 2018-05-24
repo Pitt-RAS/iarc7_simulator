@@ -17,13 +17,18 @@ create_teleport_actuator = rospy.get_param('sim/create_teleport_actuator', False
 prototype_uav = rospy.get_param('sim/prototype_uav', True)
 no_drone = rospy.get_param('sim/no_drone', False)
 
+publish_ground_truth_roombas = rospy.get_param(
+        '/sim/ground_truth_roombas', False)
+publish_ground_truth_obstacles = rospy.get_param(
+        '/sim/ground_truth_obstacles', False)
+
 num_targets = rospy.get_param('sim/num_roombas')
 num_obstacles = rospy.get_param('sim/num_obstacles')
 # Place roombas
 roomba_placement_radius = 1
 for i in range(num_targets):
     angle = 2*math.pi / num_targets * i
-    robot = TargetRoomba('roomba%i'%i)
+    robot = TargetRoomba('roomba%i'%i, publish_tf=publish_ground_truth_roombas)
     robot.translate(roomba_placement_radius * math.cos(angle),
             roomba_placement_radius * math.sin(angle),
             0)
@@ -33,7 +38,7 @@ for i in range(num_targets):
 obstacle_placement_radius = 5
 for i in range(num_obstacles):
     angle = 2*math.pi / num_obstacles * i
-    robot = Obstacle('obstacle%i'%i)
+    robot = Obstacle('obstacle%i'%i, publish_tf=publish_ground_truth_obstacles)
     robot.translate(obstacle_placement_radius * -math.sin(angle),
             obstacle_placement_radius * math.cos(angle),
             0)

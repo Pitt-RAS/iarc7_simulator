@@ -341,7 +341,7 @@ if __name__ == '__main__':
     noisy_roombas_d0 = rospy.get_param(
             '/sim/noisy_roombas/d0', 0.0)
     publish_ground_truth_obstacles = rospy.get_param(
-            '/sim/noisy_roombas', False)
+            '/sim/ground_truth_obstacles', False)
     max_roomba_output_freq = rospy.get_param(
             '/sim/max_roomba_output_freq', float('Inf'))
     max_obstacle_output_freq = rospy.get_param(
