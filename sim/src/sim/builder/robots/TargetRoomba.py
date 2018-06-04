@@ -5,10 +5,10 @@ class TargetRoomba(Roomba):
     """
     A template robot model for TargetRoomba, with a motion controller and a pose sensor.
     """
-    def __init__(self, name=None, debug=False):
+    def __init__(self, name=None, debug=False, publish_tf=True):
 
         # TargetRoomba.blend is located in the data/robots directory
-        Roomba.__init__(self, '', name, debug)
+        Roomba.__init__(self, '', name, debug, publish_tf)
         self.properties(classpath = "sim.robots.TargetRoomba.TargetRoomba")
 
         ###################################

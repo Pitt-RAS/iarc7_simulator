@@ -15,7 +15,7 @@ class Roomba(GroundRobot):
     BUMP_SENSOR_ANGLE = 0.489957 / 2
     NUM_BUMP_SENSORS = 12
 
-    def __init__(self, filename=None, name=None, debug=False):
+    def __init__(self, filename=None, name=None, debug=False, publish_tf=True):
         # Roomba.blend is located in the data/robots directory
         filename = filename or 'sim/robots/Roomba.blend'
         name = name or 'roomba'
@@ -44,12 +44,13 @@ class Roomba(GroundRobot):
         # Sensors
         ###################################
 
+        frame_prefix = '' if publish_tf else 'sim/'
         self.odom = OdometryAbsolutePose()
         self.odom.add_stream('ros',
                              'morse.middleware.ros.odometry.OdometryPublisher',
                              topic='/sim/{}/odom'.format(name),
                              frame_id='map',
-                             child_frame_id='{}/base_link'.format(name))
+                             child_frame_id=frame_prefix + '{}/base_link'.format(name))
         self.append(self.odom)
 
         angle = -float(Roomba.NUM_BUMP_SENSORS - 1) / 2 * Roomba.BUMP_SENSOR_ANGLE

@@ -48,3 +48,6 @@ sim:
 
     # If this is a regular Quadrotor (not from senior design) make this false
     prototype_uav: true
+
+    # If this is true, no drone will be created
+    no_drone: false
