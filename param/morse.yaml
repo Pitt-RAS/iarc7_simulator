@@ -37,7 +37,7 @@ sim:
     #   GymFloor
     #   RealFloor
     #   RealFloorV2
-    floor: RealFloorV2
+    floor: ArenaFloor5m
 
     # Uncomment to turn cameras on
     # Aspect ratio must be 4:3 for the image to come out unstretched
