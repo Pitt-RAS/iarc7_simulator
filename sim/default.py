@@ -69,7 +69,7 @@ if not no_drone:
 # Add /clock publisher
 fake_robot = FakeRobot()
 clock = Clock()
-clock.frequency(101)
+#clock.frequency(101)
 clock.add_interface('ros', topic='/clock')
 fake_robot.append(clock)
 
@@ -79,7 +79,7 @@ env = Environment('environment.blend', fastmode = False)
 # These have to be set for the imu (really the magnetometer in the imu) to work.
 env.properties(latitude=0.0, longitude=0.0, altitude=0.0)
 
-env.simulator_frequency(101)
+#env.simulator_frequency(101)
 env.set_time_strategy(TimeStrategies.FixedSimulationStep)
 env.set_camera_location([-18.0, -6.7, 10.8])
 env.set_camera_rotation([1.09, 0, -1.14])
