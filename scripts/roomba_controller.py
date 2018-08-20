@@ -20,6 +20,10 @@ def top_touch_service_handler(request):
         return SetBoolOnResponse(success=False, message=error_msg)
     return SetBoolOnResponse(success=True)
 
+def start_roombas_callback(data):
+    global start_roombas
+    start_roombas = True
+
 if __name__ == '__main__':
     rospy.init_node('roomba_controller')
 
@@ -60,6 +64,14 @@ if __name__ == '__main__':
         obstacle.send_start_signal()
 
     rate = rospy.Rate(100)
+
+    start_roombas = False
+    wait_for_start = rospy.get_param('wait_for_start', False)
+    if wait_for_start:
+        subscriber = rospy.Subscriber('/start_roombas', BoolStamped, start_roombas_callback)
+        while not start_roombas:
+            rate.sleep()
+
     while not rospy.is_shutdown():
         rate.sleep()
         for roomba in roombas:
